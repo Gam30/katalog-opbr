@@ -1,0 +1,1848 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Katalog Akun OPBR • @opbr.gam</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+          },
+          colors: {
+            igdark: {
+              bg: '#09090b',
+              card: '#121215',
+              border: '#27272a',
+              muted: '#a1a1aa'
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    /* Custom scrollbar & smooth transitions */
+    * {
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      overflow-x: hidden;
+    }
+    /* Instagram-style gradient avatar ring */
+    .ig-avatar-ring {
+      background: linear-gradient(45deg, #f59e0b 0%, #ef4444 50%, #8b5cf6 100%);
+      padding: 2.5px;
+    }
+    /* Hide scrollbar for clean horizontal scroll areas */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.97); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .animate-modal {
+      animation: fadeIn 0.18s ease-out forwards;
+    }
+  </style>
+</head>
+<body class="bg-zinc-50 text-zinc-900 dark:bg-igdark-bg dark:text-zinc-100 min-h-screen transition-colors duration-200 selection:bg-emerald-500 selection:text-white">
+
+  <!-- Top Sticky Navigation Bar (Instagram Style) -->
+  <header class="sticky top-0 z-30 bg-white/90 dark:bg-igdark-bg/90 backdrop-blur-md border-b border-zinc-200 dark:border-igdark-border">
+    <div class="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
+      <!-- Left: Store Handle, Verified Badge & Live Sync Status -->
+      <div class="flex items-center gap-1.5 min-w-0">
+        <span id="nav-handle" class="font-bold text-base sm:text-lg tracking-tight truncate">@opbr.gam</span>
+        <!-- Verified Store Badge -->
+        <span title="Verified Store" class="inline-flex items-center justify-center text-sky-500 shrink-0">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 2L14.8 4.2L18.4 3.8L19.6 7.2L22.6 9.2L21.6 12.6L22.6 16L19.6 18L18.4 21.4L14.8 21L12 23.2L9.2 21L5.6 21.4L4.4 18L1.4 16L2.4 12.6L1.4 9.2L4.4 7.2L5.6 3.8L9.2 4.2L12 2ZM10.4 15.6L16.8 9.2L15.4 7.8L10.4 12.8L8.2 10.6L6.8 12L10.4 15.6Z"/>
+          </svg>
+        </span>
+        <!-- Real-Time Connection Indicator -->
+        <span id="sync-status-badge" title="Status Koneksi Real-Time"
+          class="inline-flex items-center gap-1.5 ml-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-zinc-200/80 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-300 dark:border-zinc-700 shrink-0">
+          <span id="sync-status-dot" class="w-1.5 h-1.5 rounded-full bg-zinc-400"></span>
+          <span id="sync-status-text">Menghubungkan...</span>
+        </span>
+        <span id="admin-status-pill" class="hidden ml-1 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-full bg-amber-500/15 text-amber-500 border border-amber-500/30 shrink-0">
+          Admin
+        </span>
+      </div>
+
+      <!-- Right: Theme Toggle & Admin Lock/Gear -->
+      <div class="flex items-center gap-1.5 sm:gap-2">
+        <!-- Theme Toggle Button -->
+        <button id="btn-theme-toggle" type="button" aria-label="Ganti Tema"
+          class="p-2.5 rounded-xl text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-colors">
+          <!-- Sun icon (shown in dark mode) -->
+          <svg id="icon-sun" class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+          </svg>
+          <!-- Moon icon (shown in light mode) -->
+          <svg id="icon-moon" class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+
+        <!-- Mode Admin Button -->
+        <button id="btn-admin-toggle" type="button" aria-label="Mode Admin"
+          class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border border-zinc-200 dark:border-zinc-800 bg-zinc-100/70 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200/70 dark:hover:bg-zinc-800 transition-colors">
+          <svg id="icon-lock-closed" class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          <svg id="icon-lock-open" class="w-4 h-4 text-emerald-500 hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
+          </svg>
+          <span class="hidden sm:inline" id="admin-btn-label">Admin</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Admin Quick Action Toolbar (Visible only when Admin Mode is unlocked) -->
+    <div id="admin-toolbar" class="hidden border-t border-zinc-200 dark:border-igdark-border bg-emerald-500/5 dark:bg-emerald-950/20">
+      <div class="max-w-3xl mx-auto px-4 py-2.5 flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <button id="btn-open-upload" type="button"
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm transition-all active:scale-[0.98]">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            Upload Akun
+          </button>
+          <button id="btn-open-settings" type="button"
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-white dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700 transition-all">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+            Pengaturan Toko
+          </button>
+        </div>
+        <button id="btn-lock-admin" type="button"
+          class="text-xs font-semibold text-zinc-500 hover:text-rose-500 dark:text-zinc-400 dark:hover:text-rose-400 px-2.5 py-1.5 rounded-lg transition-colors">
+          Keluar Admin
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-3xl mx-auto pb-16">
+
+    <!-- Instagram-Style Profile Header -->
+    <section class="px-4 pt-6 pb-5">
+      <div class="flex items-center gap-5 sm:gap-8">
+        <!-- Circular Store Avatar -->
+        <div class="shrink-0">
+          <div class="ig-avatar-ring rounded-full">
+            <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-zinc-900 p-0.5 overflow-hidden flex items-center justify-center">
+              <img id="store-avatar-img" src="" alt="Foto Profil Toko" class="w-full h-full object-cover rounded-full" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Store Info & Minimalist Stats Row -->
+        <div class="flex-1 min-w-0">
+          <div class="flex flex-wrap items-center gap-2 mb-3">
+            <h1 id="profile-handle" class="text-lg sm:text-xl font-bold tracking-tight truncate">@opbr.gam</h1>
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-sky-500/10 text-sky-500 border border-sky-500/20">
+              <svg class="w-3 h-3 fill-current" viewBox="0 0 24 24">
+                <path d="M12 2L14.8 4.2L18.4 3.8L19.6 7.2L22.6 9.2L21.6 12.6L22.6 16L19.6 18L18.4 21.4L14.8 21L12 23.2L9.2 21L5.6 21.4L4.4 18L1.4 16L2.4 12.6L1.4 9.2L4.4 7.2L5.6 3.8L9.2 4.2L12 2ZM10.4 15.6L16.8 9.2L15.4 7.8L10.4 12.8L8.2 10.6L6.8 12L10.4 15.6Z"/>
+              </svg>
+              Verified Store
+            </span>
+          </div>
+
+          <!-- Stats Row: Total Akun | Ready | Sold -->
+          <div class="grid grid-cols-3 gap-2 max-w-xs sm:max-w-sm text-center sm:text-left">
+            <div class="bg-zinc-100/80 dark:bg-igdark-card border border-zinc-200/70 dark:border-igdark-border rounded-xl px-2.5 py-2">
+              <div id="stat-total" class="text-base sm:text-lg font-extrabold text-zinc-900 dark:text-white leading-tight">0</div>
+              <div class="text-[11px] sm:text-xs text-zinc-500 dark:text-zinc-400 font-medium">Total Akun</div>
+            </div>
+            <div class="bg-emerald-500/5 dark:bg-emerald-950/20 border border-emerald-500/20 rounded-xl px-2.5 py-2">
+              <div id="stat-ready" class="text-base sm:text-lg font-extrabold text-emerald-600 dark:text-emerald-400 leading-tight">0</div>
+              <div class="text-[11px] sm:text-xs text-emerald-700/80 dark:text-emerald-400/80 font-medium">Ready</div>
+            </div>
+            <div class="bg-zinc-100/80 dark:bg-igdark-card border border-zinc-200/70 dark:border-igdark-border rounded-xl px-2.5 py-2">
+              <div id="stat-sold" class="text-base sm:text-lg font-extrabold text-zinc-500 dark:text-zinc-400 leading-tight">0</div>
+              <div class="text-[11px] sm:text-xs text-zinc-500 dark:text-zinc-400 font-medium">Sold</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Store Name & Concise Bio Section -->
+      <div class="mt-4">
+        <h2 id="store-display-name" class="text-xs sm:text-sm font-bold text-zinc-900 dark:text-white mb-0.5">OPBR Gam Store</h2>
+        <div class="text-xs sm:text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed whitespace-pre-line" id="store-bio">
+          Katalog Resmi Akun OPBR • Klik foto akun untuk cek spek &amp; harga • Minat? Langsung klik tombol WhatsApp di bawah
+        </div>
+      </div>
+
+      <!-- Single Primary Action Button: Chat WhatsApp Admin -->
+      <div class="mt-4">
+        <a id="btn-header-wa" href="#" target="_blank" rel="noopener noreferrer"
+          class="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-semibold text-sm bg-emerald-600 hover:bg-emerald-500 active:scale-[0.99] text-white shadow-sm shadow-emerald-600/20 transition-all">
+          <!-- WhatsApp SVG Icon -->
+          <svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
+            <path d="M12.031 2c-5.516 0-9.969 4.453-9.969 9.969 0 1.758.459 3.475 1.331 4.988L2 22l5.188-1.361a9.927 9.927 0 0 0 4.843 1.258h.004c5.515 0 9.968-4.453 9.968-9.969 0-2.663-1.037-5.167-2.92-7.05A9.903 9.903 0 0 0 12.031 2zm5.822 14.274c-.245.691-1.425 1.321-1.976 1.404-.506.076-1.147.108-1.85-.115-.426-.135-.974-.316-1.675-.619-2.946-1.272-4.87-4.238-5.017-4.434-.147-.196-1.198-1.594-1.198-3.041 0-1.447.758-2.158 1.027-2.452.269-.294.588-.368.784-.368.196 0 .392.002.563.01.181.009.423-.069.662.505.245.588.833 2.035.906 2.182.074.147.123.319.025.515-.098.196-.147.319-.294.49-.147.172-.309.383-.441.515-.147.147-.3.306-.129.6.172.294.762 1.257 1.636 2.036 1.124 1.002 2.072 1.313 2.366 1.46.294.147.466.123.637-.074.172-.196.735-.858.931-1.152.196-.294.392-.245.662-.147.269.098 1.715.809 2.009.956.294.147.49.221.563.343.074.123.074.711-.171 1.402z"/>
+          </svg>
+          <span>Chat WhatsApp Admin</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- Instagram-Style Feed Filter Tabs -->
+    <nav aria-label="Filter Katalog" class="border-t border-b border-zinc-200 dark:border-igdark-border bg-white/60 dark:bg-igdark-bg/60 sticky top-14 z-20 backdrop-blur-sm">
+      <div class="grid grid-cols-3">
+        <button type="button" data-filter="all"
+          class="filter-tab active-tab flex items-center justify-center gap-1.5 py-3 text-xs sm:text-sm font-semibold border-t-2 border-zinc-900 dark:border-white text-zinc-900 dark:text-white transition-colors">
+          <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>Semua</span>
+        </button>
+
+        <button type="button" data-filter="ready"
+          class="filter-tab flex items-center justify-center gap-1.5 py-3 text-xs sm:text-sm font-medium border-t-2 border-transparent text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span>Ready</span>
+        </button>
+
+        <button type="button" data-filter="sold"
+          class="filter-tab flex items-center justify-center gap-1.5 py-3 text-xs sm:text-sm font-medium border-t-2 border-transparent text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors">
+          <span class="w-2 h-2 rounded-full bg-rose-500/70"></span>
+          <span>Sold</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Loading Skeleton State -->
+    <div id="catalog-loading" class="grid grid-cols-3 gap-1 sm:gap-2 p-1 sm:p-2">
+      <div class="aspect-square bg-zinc-200 dark:bg-zinc-900 animate-pulse rounded-sm sm:rounded-lg"></div>
+      <div class="aspect-square bg-zinc-200 dark:bg-zinc-900 animate-pulse rounded-sm sm:rounded-lg"></div>
+      <div class="aspect-square bg-zinc-200 dark:bg-zinc-900 animate-pulse rounded-sm sm:rounded-lg"></div>
+    </div>
+
+    <!-- 3-Column Instagram-Style Square Catalog Grid -->
+    <section id="catalog-grid" class="hidden grid grid-cols-3 gap-1 sm:gap-2 p-1 sm:p-2" aria-label="Daftar Akun OPBR">
+      <!-- Cards injected dynamically by JS -->
+    </section>
+
+    <!-- Empty State -->
+    <div id="catalog-empty" class="hidden py-16 px-4 text-center">
+      <div class="w-14 h-14 mx-auto mb-3 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center justify-center text-zinc-400">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+        </svg>
+      </div>
+      <p class="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Belum ada akun di kategori ini</p>
+      <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Cek tab "Semua" atau hubungi WhatsApp Admin untuk request akun.</p>
+    </div>
+
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 1: ACCOUNT DETAIL VIEWER (INSTAGRAM POST MODAL)                 -->
+  <!-- ===================================================================== -->
+  <div id="modal-detail" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-3 sm:p-5 overflow-y-auto" role="dialog" aria-modal="true">
+    <div class="animate-modal relative w-full max-w-lg bg-white dark:bg-igdark-card border border-zinc-200 dark:border-igdark-border rounded-2xl overflow-hidden shadow-2xl my-auto">
+
+      <!-- Modal Top Header -->
+      <div class="flex items-center justify-between px-4 py-3 border-b border-zinc-200 dark:border-igdark-border">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <img id="detail-avatar" src="" alt="Avatar" class="w-8 h-8 rounded-full object-cover border border-zinc-300 dark:border-zinc-700" />
+          <div class="min-w-0">
+            <div class="flex items-center gap-1">
+              <span id="detail-store-handle" class="text-xs sm:text-sm font-bold truncate">@opbr.gam</span>
+              <svg class="w-3.5 h-3.5 text-sky-500 fill-current shrink-0" viewBox="0 0 24 24">
+                <path d="M12 2L14.8 4.2L18.4 3.8L19.6 7.2L22.6 9.2L21.6 12.6L22.6 16L19.6 18L18.4 21.4L14.8 21L12 23.2L9.2 21L5.6 21.4L4.4 18L1.4 16L2.4 12.6L1.4 9.2L4.4 7.2L5.6 3.8L9.2 4.2L12 2ZM10.4 15.6L16.8 9.2L15.4 7.8L10.4 12.8L8.2 10.6L6.8 12L10.4 15.6Z"/>
+              </svg>
+            </div>
+            <p class="text-[11px] text-zinc-500 dark:text-zinc-400">One Piece Bounty Rush</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <span id="detail-status-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide">
+            READY
+          </span>
+          <button id="btn-close-detail" type="button" aria-label="Tutup"
+            class="p-2 rounded-xl text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Image Carousel Area -->
+      <div id="detail-carousel" class="relative w-full aspect-square bg-zinc-950 select-none overflow-hidden group">
+        <img id="detail-main-img" src="" alt="Screenshot Akun OPBR" class="w-full h-full object-contain bg-zinc-950 transition-opacity duration-200" />
+
+        <!-- Image Counter Pill (e.g. 1/3) -->
+        <div id="carousel-counter" class="hidden absolute top-3 right-3 px-2.5 py-1 rounded-full bg-black/70 text-white text-[11px] font-semibold backdrop-blur-sm">
+          1 / 1
+        </div>
+
+        <!-- Prev Button -->
+        <button id="carousel-prev" type="button" aria-label="Foto Sebelumnya"
+          class="hidden absolute left-2.5 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-sm transition-all">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+          </svg>
+        </button>
+
+        <!-- Next Button -->
+        <button id="carousel-next" type="button" aria-label="Foto Berikutnya"
+          class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-sm transition-all">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+          </svg>
+        </button>
+
+        <!-- Pagination Dots -->
+        <div id="carousel-dots" class="hidden absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/45 backdrop-blur-sm">
+        </div>
+      </div>
+
+      <!-- Account Info & Specifications -->
+      <div class="p-4 sm:p-5">
+        <div class="flex flex-wrap items-start justify-between gap-2 mb-3">
+          <h2 id="detail-title" class="text-base sm:text-lg font-bold text-zinc-900 dark:text-white leading-snug">
+            #OPBR-01
+          </h2>
+          <div id="detail-price" class="text-lg sm:text-xl font-extrabold text-emerald-600 dark:text-emerald-400">
+            Rp 0
+          </div>
+        </div>
+
+        <!-- Caption / Specs Box -->
+        <div class="bg-zinc-50 dark:bg-zinc-900/80 border border-zinc-200/80 dark:border-zinc-800 rounded-xl p-3.5 max-h-48 overflow-y-auto">
+          <p id="detail-specs" class="text-xs sm:text-sm text-zinc-700 dark:text-zinc-300 whitespace-pre-line leading-relaxed"></p>
+        </div>
+
+        <!-- Primary Buyer CTA: Beli Akun Ini via WhatsApp -->
+        <div class="mt-4">
+          <a id="btn-detail-wa" href="#" target="_blank" rel="noopener noreferrer"
+            class="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-sm bg-emerald-600 hover:bg-emerald-500 active:scale-[0.99] text-white shadow-md shadow-emerald-600/20 transition-all">
+            <svg class="w-5 h-5 fill-current shrink-0" viewBox="0 0 24 24">
+              <path d="M12.031 2c-5.516 0-9.969 4.453-9.969 9.969 0 1.758.459 3.475 1.331 4.988L2 22l5.188-1.361a9.927 9.927 0 0 0 4.843 1.258h.004c5.515 0 9.968-4.453 9.968-9.969 0-2.663-1.037-5.167-2.92-7.05A9.903 9.903 0 0 0 12.031 2zm5.822 14.274c-.245.691-1.425 1.321-1.976 1.404-.506.076-1.147.108-1.85-.115-.426-.135-.974-.316-1.675-.619-2.946-1.272-4.87-4.238-5.017-4.434-.147-.196-1.198-1.594-1.198-3.041 0-1.447.758-2.158 1.027-2.452.269-.294.588-.368.784-.368.196 0 .392.002.563.01.181.009.423-.069.662.505.245.588.833 2.035.906 2.182.074.147.123.319.025.515-.098.196-.147.319-.294.49-.147.172-.309.383-.441.515-.147.147-.3.306-.129.6.172.294.762 1.257 1.636 2.036 1.124 1.002 2.072 1.313 2.366 1.46.294.147.466.123.637-.074.172-.196.735-.858.931-1.152.196-.294.392-.245.662-.147.269.098 1.715.809 2.009.956.294.147.49.221.563.343.074.123.074.711-.171 1.402z"/>
+            </svg>
+            <span id="detail-wa-label">Beli Akun Ini via WhatsApp</span>
+          </a>
+        </div>
+
+        <!-- Admin Controls inside Detail Modal (Visible when Admin Mode is unlocked) -->
+        <div id="detail-admin-controls" class="hidden mt-4 pt-3.5 border-t border-zinc-200 dark:border-zinc-800">
+          <div class="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-2">Kontrol Admin</div>
+          <div class="grid grid-cols-3 gap-2">
+            <button id="btn-toggle-status" type="button"
+              class="py-2 px-2.5 rounded-xl text-xs font-semibold bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 transition-colors">
+              Ubah Status
+            </button>
+            <button id="btn-edit-account" type="button"
+              class="py-2 px-2.5 rounded-xl text-xs font-semibold bg-sky-500/15 hover:bg-sky-500/25 text-sky-600 dark:text-sky-400 border border-sky-500/30 transition-colors">
+              Edit Akun
+            </button>
+            <button id="btn-delete-account" type="button"
+              class="py-2 px-2.5 rounded-xl text-xs font-semibold bg-rose-500/15 hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 border border-rose-500/30 transition-colors">
+              Hapus
+            </button>
+          </div>
+          <!-- Inline Delete Confirmation Box (Replaces browser confirm()) -->
+          <div id="delete-confirm-box" class="hidden mt-2.5 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-between gap-2">
+            <span class="text-xs font-medium text-rose-600 dark:text-rose-300">Yakin hapus akun ini permanen?</span>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button id="btn-cancel-delete" type="button" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">Batal</button>
+              <button id="btn-confirm-delete" type="button" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-rose-600 text-white">Ya, Hapus</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 2: ADMIN PIN UNLOCK MODAL                                       -->
+  <!-- ===================================================================== -->
+  <div id="modal-pin" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4" role="dialog" aria-modal="true">
+    <div class="animate-modal w-full max-w-xs bg-white dark:bg-igdark-card border border-zinc-200 dark:border-igdark-border rounded-2xl p-5 shadow-2xl">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-500 flex items-center justify-center">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+          </div>
+          <h3 class="font-bold text-base">Mode Admin</h3>
+        </div>
+        <button id="btn-close-pin" type="button" class="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-white">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-3">
+        Masukkan 4-digit PIN untuk upload akun & atur toko.
+      </p>
+
+      <form id="form-pin" class="space-y-3">
+        <input id="input-pin" type="password" inputmode="numeric" maxlength="4" pattern="[0-9]*" placeholder="••••" autocomplete="off"
+          class="w-full text-center text-2xl tracking-[0.6em] font-bold py-3 px-4 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 focus:outline-none focus:border-emerald-500" />
+        <p id="pin-error" class="hidden text-xs text-rose-500 text-center font-medium">PIN salah. Silakan coba lagi.</p>
+        <p class="text-[11px] text-center text-zinc-400 dark:text-zinc-500">
+          Hint PIN default: <span class="font-mono font-semibold text-zinc-600 dark:text-zinc-300">1234</span>
+        </p>
+        <button type="submit"
+          class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm transition-colors">
+          Buka Mode Admin
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 3: UPLOAD / EDIT OPBR ACCOUNT MODAL                             -->
+  <!-- ===================================================================== -->
+  <div id="modal-upload" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto" role="dialog" aria-modal="true">
+    <div class="animate-modal w-full max-w-lg bg-white dark:bg-igdark-card border border-zinc-200 dark:border-igdark-border rounded-2xl overflow-hidden shadow-2xl my-auto">
+      <div class="flex items-center justify-between px-5 py-3.5 border-b border-zinc-200 dark:border-igdark-border">
+        <h3 id="upload-modal-title" class="font-bold text-base">Upload Akun OPBR Baru</h3>
+        <button id="btn-close-upload" type="button" class="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-white">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <form id="form-upload" class="p-5 space-y-4 max-h-[82vh] overflow-y-auto">
+        <input type="hidden" id="edit-account-id" value="" />
+
+        <!-- Image Picker & Preview -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+              Screenshot Akun (Maks. 4 Foto)
+            </label>
+            <span id="upload-photo-count" class="text-[11px] font-semibold text-zinc-400">0 / 4 foto</span>
+          </div>
+          <label for="input-images"
+            class="flex flex-col items-center justify-center w-full py-5 px-4 border-2 border-dashed border-zinc-300 dark:border-zinc-700 hover:border-emerald-500 dark:hover:border-emerald-500 rounded-xl cursor-pointer bg-zinc-50 dark:bg-zinc-900/50 transition-colors">
+            <svg class="w-7 h-7 text-zinc-400 mb-1.5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+            </svg>
+            <span class="text-xs sm:text-sm font-semibold text-zinc-700 dark:text-zinc-200">Klik untuk pilih screenshot dari galeri</span>
+            <span class="text-[11px] text-zinc-400 mt-0.5">Kompresi otomatis &lt;120KB/foto agar sinkron cepat</span>
+            <input id="input-images" type="file" accept="image/*" multiple class="hidden" />
+          </label>
+
+          <!-- Preview Thumbnails (Reorderable & Deletable) -->
+          <div id="upload-preview-grid" class="grid grid-cols-4 gap-2 mt-2.5 empty:hidden"></div>
+        </div>
+
+        <!-- Title / Account Code -->
+        <div>
+          <label for="input-title" class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">
+            Judul / Kode Akun
+          </label>
+          <input id="input-title" type="text" required placeholder="Contoh: #OPBR-04 • 3 EX G5 Luffy + Shanks + 1200 RD"
+            class="w-full px-3.5 py-2.5 rounded-xl text-sm bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 focus:outline-none focus:border-emerald-500" />
+        </div>
+
+        <!-- Price & Status Row -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="input-price" class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">
+              Harga (Rp)
+            </label>
+            <input id="input-price" type="number" min="0" step="1000" required placeholder="350000"
+              class="w-full px-3.5 py-2.5 rounded-xl text-sm bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 focus:outline-none focus:border-emerald-500" />
+          </div>
+          <div>
+            <label for="input-status" class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">
+              Status Stok
+            </label>
+            <select id="input-status"
+              class="w-full px-3.5 py-2.5 rounded-xl text-sm bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 focus:outline-none focus:border-emerald-500">
+              <option value="ready">READY STOCK</option>
+              <option value="sold">SOLD OUT</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Account Specifications / Caption -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label for="input-specs" class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+              Spesifikasi & Detail Akun
+            </label>
+            <button id="btn-insert-template" type="button"
+              class="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 hover:underline">
+              + Isi Template Spek
+            </button>
+          </div>
+          <textarea id="input-specs" rows="5" required placeholder="Tulis daftar EX, jumlah Rainbow Diamonds (RD), Gold Fragments (GF), Support %, dan jenis login..."
+            class="w-full px-3.5 py-2.5 rounded-xl text-sm bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 focus:outline-none focus:border-emerald-500 leading-relaxed"></textarea>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="pt-1 flex items-center justify-end gap-2">
+          <button id="btn-cancel-upload" type="button"
+            class="px-4 py-2.5 rounded-xl text-sm font-semibold bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors">
+            Batal
+          </button>
+          <button id="btn-submit-upload" type="submit"
+            class="px-5 py-2.5 rounded-xl text-sm font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm transition-all disabled:opacity-50">
+            Posting ke Katalog
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 4: STORE SETTINGS MODAL                                         -->
+  <!-- ===================================================================== -->
+  <div id="modal-settings" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto" role="dialog" aria-modal="true">
+    <div class="animate-modal w-full max-w-md bg-white dark:bg-igdark-card border border-zinc-200 dark:border-igdark-border rounded-2xl overflow-hidden shadow-2xl my-auto">
+      <div class="flex items-center justify-between px-5 py-3.5 border-b border-zinc-200 dark:border-igdark-border">
+        <h3 class="font-bold text-base">Pengaturan Toko</h3>
+        <button id="btn-close-settings" type="button" class="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-white">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <form id="form-settings" class="p-5 space-y-4 max-h-[82vh] overflow-y-auto">
+        <!-- Avatar Upload -->
+        <div class="flex items-center gap-4">
+          <img id="settings-avatar-preview" src="" alt="Preview Avatar" class="w-16 h-16 rounded-full object-cover border border-zinc-300 dark:border-zinc-700 shrink-0" />
+          <div class="space-y-1.5">
+            <label for="input-store-avatar" class="inline-block px-3 py-1.5 rounded-xl text-xs font-semibold bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 cursor-pointer transition-colors">
+              Ganti Foto Profil
+              <input id="input-store-avatar" type="file" accept="image/*" class="hidden" />
+            </label>
+            <button id="btn-reset-avatar" type="button" class="block text-[11px] font-medium text-zinc-400 hover:text-rose-500 transition-colors">
+              Reset ke Default
+            </button>
+          </div>
+        </div>
+
+        <!-- Store Name -->
+        <div>
+          <label for="input-store-name" class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">
+            Nama Toko
+          </label>
+          <input id="input-store-name" type="text" required placeholder="OPBR Gam Store"
+            class="w-full px-3.5 py-2.5 rounded-xl text-sm bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 focus:outline-none focus:border-emerald-500" />
+        </div>
+
+        <!-- Store Handle -->
+        <div>
+          <label for="input-store-handle" class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">
+            Handle / Username Toko
+          </label>
+          <input id="input-store-handle" type="text" required placeholder="@opbr.gam"
+            class="w-full px-3.5 py-2.5 rounded-xl text-sm bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 focus:outline-none focus:border-emerald-500" />
+        </div>
+
+        <!-- WhatsApp Admin Number -->
+        <div>
+          <label for="input-store-wa" class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">
+            Nomor WhatsApp Admin (Format 628xxx)
+          </label>
+          <input id="input-store-wa" type="tel" required placeholder="6281234567890"
+            class="w-full px-3.5 py-2.5 rounded-xl text-sm bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 focus:outline-none focus:border-emerald-500" />
+          <p class="text-[11px] text-zinc-400 mt-1">Gunakan kode negara 62 tanpa tanda + atau spasi (contoh: 628123456789).</p>
+        </div>
+
+        <!-- Bio -->
+        <div>
+          <label for="input-store-bio" class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">
+            Bio Toko
+          </label>
+          <textarea id="input-store-bio" rows="3" required
+            class="w-full px-3.5 py-2.5 rounded-xl text-sm bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 focus:outline-none focus:border-emerald-500"></textarea>
+        </div>
+
+        <!-- Change Admin PIN -->
+        <div>
+          <label for="input-store-pin" class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">
+            PIN Admin (4 Digit Angka)
+          </label>
+          <input id="input-store-pin" type="text" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" required placeholder="1234"
+            class="w-full px-3.5 py-2.5 rounded-xl text-sm font-mono tracking-widest bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 focus:outline-none focus:border-emerald-500" />
+        </div>
+
+        <!-- Self-Hosting Firebase Config Trigger -->
+        <div class="pt-1 border-t border-zinc-200 dark:border-zinc-800">
+          <button id="btn-open-firebase-modal" type="button"
+            class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 transition-colors">
+            <span class="flex items-center gap-2">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              Konfigurasi Firebase (Untuk Hosting Mandiri)
+            </span>
+            <span>Atur &rarr;</span>
+          </button>
+        </div>
+
+        <div class="pt-1 flex items-center justify-end gap-2">
+          <button id="btn-cancel-settings" type="button"
+            class="px-4 py-2.5 rounded-xl text-sm font-semibold bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
+            Batal
+          </button>
+          <button id="btn-save-settings" type="submit"
+            class="px-5 py-2.5 rounded-xl text-sm font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm transition-all">
+            Simpan Pengaturan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 5: FIREBASE REAL-TIME CONFIGURATION & SELF-HOSTING GUIDE        -->
+  <!-- ===================================================================== -->
+  <div id="modal-firebase" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto" role="dialog" aria-modal="true">
+    <div class="animate-modal w-full max-w-lg bg-white dark:bg-igdark-card border border-zinc-200 dark:border-igdark-border rounded-2xl overflow-hidden shadow-2xl my-auto">
+      <div class="flex items-center justify-between px-5 py-3.5 border-b border-zinc-200 dark:border-igdark-border">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+          <h3 class="font-bold text-base">Konfigurasi Firebase Real-Time</h3>
+        </div>
+        <button id="btn-close-firebase" type="button" class="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-white">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="p-5 space-y-4 max-h-[82vh] overflow-y-auto text-xs sm:text-sm">
+        <!-- Step-by-step Guide -->
+        <div class="p-3.5 rounded-xl bg-zinc-100 dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-800 space-y-2 text-xs text-zinc-700 dark:text-zinc-300 leading-relaxed">
+          <p class="font-bold text-zinc-900 dark:text-white">Cara Menghubungkan Database Gratis (Tanpa Kartu Kredit):</p>
+          <ol class="list-decimal list-inside space-y-1.5">
+            <li>Buka <strong>console.firebase.google.com</strong> &rarr; klik <strong>Add project</strong>.</li>
+            <li>Buka menu <strong>Build &rarr; Firestore Database</strong> &rarr; klik <strong>Create database</strong> (pilih mode <em>Test mode</em> / sesuaikan Rules).</li>
+            <li>Buka menu <strong>Build &rarr; Authentication &rarr; Sign-in method</strong> &rarr; aktifkan <strong>Anonymous</strong>.</li>
+            <li>Buka <strong>Project Settings (ikon roda gigi) &rarr; General &rarr; Your apps &rarr; Web (&lt;/&gt;)</strong>, lalu salin objek <code class="px-1 py-0.5 rounded bg-zinc-200 dark:bg-zinc-800 font-mono">firebaseConfig</code> di bawah ini.</li>
+          </ol>
+        </div>
+
+        <!-- Paste Config Textarea -->
+        <div>
+          <label for="input-firebase-config" class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">
+            Tempel Objek firebaseConfig (JSON atau JS Snippet)
+          </label>
+          <textarea id="input-firebase-config" rows="6"
+            placeholder='{
+  "apiKey": "AIzaSy...",
+  "authDomain": "toko-opbr.firebaseapp.com",
+  "projectId": "toko-opbr",
+  "storageBucket": "toko-opbr.appspot.com",
+  "messagingSenderId": "123456789",
+  "appId": "1:123456789:web:abcdef"
+}'
+            class="w-full p-3 rounded-xl text-xs font-mono bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 focus:outline-none focus:border-emerald-500"></textarea>
+          <p id="firebase-config-error" class="hidden text-xs text-rose-500 mt-1 font-medium"></p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-2 pt-1">
+          <button id="btn-apply-firebase" type="button"
+            class="flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm transition-all">
+            Hubungkan Sekarang
+          </button>
+          <button id="btn-download-selfhost" type="button"
+            class="flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold bg-sky-600 hover:bg-sky-500 text-white shadow-sm transition-all">
+            Download index.html Siap Hosting
+          </button>
+        </div>
+        <p class="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
+          Tips: Klik <strong>Download index.html Siap Hosting</strong> agar kode <code class="font-mono">firebaseConfig</code> tertanam permanen di dalam file HTML sebelum kamu upload ke Vercel, Netlify, atau GitHub Pages.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Banner (Non-blocking feedback) -->
+  <div id="toast-banner" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 hidden items-center gap-2 px-4 py-2.5 rounded-full bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-xs sm:text-sm font-semibold shadow-xl border border-zinc-700 dark:border-zinc-300">
+    <span id="toast-message">Berhasil disimpan</span>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- APPLICATION LOGIC & FIREBASE FIRESTORE SYNC                           -->
+  <!-- ===================================================================== -->
+  <script type="module">
+    import { initializeApp, getApps, deleteApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      setDoc,
+      addDoc,
+      updateDoc,
+      deleteDoc,
+      onSnapshot,
+      collection
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // Konfigurasi Firebase tertanam untuk hosting mandiri (otomatis terisi saat download file siap hosting)
+    const EMBEDDED_FIREBASE_CONFIG = null;
+
+    // =========================================================================
+    // 1. DEFAULT ASSETS (SVG EMBLEM & SAMPLE OPBR ACCOUNT CARDS)
+    // =========================================================================
+    function generateDefaultAvatarSVG() {
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+        <defs>
+          <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#18181b"/>
+            <stop offset="100%" stop-color="#09090b"/>
+          </linearGradient>
+          <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#fbbf24"/>
+            <stop offset="100%" stop-color="#d97706"/>
+          </linearGradient>
+        </defs>
+        <rect width="200" height="200" fill="url(#bgGrad)"/>
+        <circle cx="100" cy="100" r="82" fill="none" stroke="url(#goldGrad)" stroke-width="4" stroke-dasharray="10 6"/>
+        <ellipse cx="100" cy="96" rx="54" ry="15" fill="#f59e0b"/>
+        <path d="M62 94 C62 58, 138 58, 138 94 Z" fill="#fbbf24"/>
+        <path d="M63 85 Q100 94 137 85 L138 93 Q100 102 62 93 Z" fill="#dc2626"/>
+        <text x="100" y="138" font-family="Inter, Arial, sans-serif" font-weight="900" font-size="25" fill="#ffffff" text-anchor="middle" letter-spacing="1.5">OPBR</text>
+        <text x="100" y="157" font-family="Inter, Arial, sans-serif" font-weight="700" font-size="11" fill="#fbbf24" text-anchor="middle" letter-spacing="2.5">STORE</text>
+      </svg>`;
+      return "data:image/svg+xml;utf8," + encodeURIComponent(svg);
+    }
+
+    function generateSampleCardSVG(code, headline, subline, accent1, accent2, tagText) {
+      const safeId = code.replace(/[^a-zA-Z0-9]/g, "");
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600">
+        <defs>
+          <linearGradient id="g_${safeId}" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="${accent1}"/>
+            <stop offset="100%" stop-color="${accent2}"/>
+          </linearGradient>
+        </defs>
+        <rect width="600" height="600" fill="#09090b"/>
+        <circle cx="480" cy="120" r="220" fill="url(#g_${safeId})" opacity="0.22"/>
+        <circle cx="120" cy="490" r="190" fill="url(#g_${safeId})" opacity="0.16"/>
+        <rect x="36" y="36" width="528" height="528" rx="28" fill="none" stroke="url(#g_${safeId})" stroke-width="3" opacity="0.7"/>
+        <rect x="64" y="72" width="165" height="38" rx="19" fill="url(#g_${safeId})"/>
+        <text x="146" y="97" font-family="Inter, Arial, sans-serif" font-weight="800" font-size="17" fill="#ffffff" text-anchor="middle" letter-spacing="1">${tagText}</text>
+        <text x="64" y="165" font-family="Inter, Arial, sans-serif" font-weight="800" font-size="24" fill="#a1a1aa">${code}</text>
+        <text x="64" y="245" font-family="Inter, Arial, sans-serif" font-weight="900" font-size="44" fill="#ffffff">${headline}</text>
+        <text x="64" y="302" font-family="Inter, Arial, sans-serif" font-weight="700" font-size="28" fill="#e4e4e7">${subline}</text>
+        <line x1="64" y1="355" x2="536" y2="355" stroke="#27272a" stroke-width="2"/>
+        <text x="64" y="405" font-family="Inter, Arial, sans-serif" font-weight="600" font-size="20" fill="#a1a1aa">ONE PIECE BOUNTY RUSH • VERIFIED ACCOUNT</text>
+        <text x="64" y="445" font-family="Inter, Arial, sans-serif" font-weight="700" font-size="19" fill="#34d399">Tap untuk cek spek lengkap &amp; order via WA</text>
+      </svg>`;
+      return "data:image/svg+xml;utf8," + encodeURIComponent(svg);
+    }
+
+    const DEFAULT_AVATAR = generateDefaultAvatarSVG();
+
+    const DEFAULT_STORE_SETTINGS = {
+      storeName: "OPBR Gam Store",
+      handle: "@opbr.gam",
+      whatsapp: "6281234567890",
+      bio: "Katalog Resmi Akun OPBR • Klik foto akun untuk cek spek & harga • Minat? Langsung klik tombol WhatsApp di bawah",
+      avatar: DEFAULT_AVATAR,
+      pin: "1234"
+    };
+
+    const SAMPLE_ACCOUNTS = [
+      {
+        title: "#OPBR-01 • 4 EX Meta G5 Luffy + Shanks Kamusari",
+        price: 650000,
+        status: "ready",
+        specs: "• EX Units: Monkey D. Luffy Gear 5 (Lv.100 Boost 2), Shanks Divine Departure (Lv.100), Gol D. Roger Dark (Lv.85), Kaido Hybrid (Lv.80)\n• Rainbow Diamonds (RD): 1.240 RD (Siap Gacha)\n• Gold Fragments (GF): 680 GF\n• Support Party: 162.4% (Full Zoan + New World Tag)\n• Medal: Triple Luffy Event & Kaido Set (9*)\n• Login: Bandai ID (Aman 100%, siap pindah email)",
+        images: [
+          generateSampleCardSVG("#OPBR-01", "4 EX META", "G5 Luffy + Shanks Kamusari", "#10b981", "#059669", "4 EX • 1240 RD"),
+          generateSampleCardSVG("#OPBR-01", "SUPPORT 162.4%", "Full Zoan & New World Tag", "#3b82f6", "#1d4ed8", "SPEK PARTY")
+        ],
+        createdAt: Date.now() - 1000
+      },
+      {
+        title: "#OPBR-02 • EX Lucci Awakened + Timbun 2.450 RD",
+        price: 280000,
+        status: "ready",
+        specs: "• EX Units: Rob Lucci CP0 Awakened (Lv.92), S-Snake (Lv.80)\n• Rainbow Diamonds (RD): 2.450 RD (Android)\n• Gold Fragments (GF): 1.150 GF (Bisa langsung B5/B6 EX baru!)\n• Support Party: 148.0% (Blue Runner Tag)\n• Login: Bandai ID (Data bersih, anti hackback)",
+        images: [
+          generateSampleCardSVG("#OPBR-02", "2.450 RD + 2 EX", "Lucci Awakened & S-Snake", "#8b5cf6", "#6d28d9", "TIMBUN RD")
+        ],
+        createdAt: Date.now() - 2000
+      },
+      {
+        title: "#OPBR-03 • Akun Sultan 6 EX Hyperboost 42",
+        price: 1450000,
+        status: "sold",
+        specs: "• EX Units: G5 Luffy, Shanks Kamusari, Zoro Onigashima, Olin Big Mom, King Alber, Blackbeard\n• Rainbow Diamonds (RD): 420 RD\n• Gold Fragments (GF): 310 GF\n• Support Party: 168.9% + 42 Hyperboost\n• Login: Bandai ID (Terjual ke Buyer Jakarta)",
+        images: [
+          generateSampleCardSVG("#OPBR-03", "SULTAN 6 EX", "Hyperboost 42 • 168.9% Supp", "#f43f5e", "#be123c", "SOLD OUT")
+        ],
+        createdAt: Date.now() - 3000
+      }
+    ];
+
+    // =========================================================================
+    // 2. APPLICATION STATE
+    // =========================================================================
+    let state = {
+      accounts: [],
+      settings: { ...DEFAULT_STORE_SETTINGS },
+      filter: "all", // 'all' | 'ready' | 'sold'
+      isAdmin: false,
+      activeAccountId: null,
+      carouselIndex: 0,
+      uploadImagesBuffer: [],
+      settingsAvatarBuffer: null,
+      useFirestore: false,
+      activeFirebaseConfig: null
+    };
+
+    let db = null;
+    let auth = null;
+    let currentUser = null;
+    let unsubSettings = null;
+    let unsubAccounts = null;
+    const appId = typeof __app_id !== "undefined" ? __app_id : "opbr-catalog-live";
+
+    // =========================================================================
+    // 3. HELPER UTILITIES & ADAPTIVE JPEG COMPRESSION (<120KB)
+    // =========================================================================
+    function formatRupiah(num) {
+      const n = Number(num) || 0;
+      return "Rp " + n.toLocaleString("id-ID");
+    }
+
+    function normalizeWhatsApp(raw) {
+      let digits = String(raw || "").replace(/\D/g, "");
+      if (digits.startsWith("0")) {
+        digits = "62" + digits.slice(1);
+      }
+      return digits || "6281234567890";
+    }
+
+    function showToast(msg) {
+      const banner = document.getElementById("toast-banner");
+      const textEl = document.getElementById("toast-message");
+      textEl.textContent = msg;
+      banner.classList.remove("hidden");
+      banner.classList.add("flex");
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => {
+        banner.classList.add("hidden");
+        banner.classList.remove("flex");
+      }, 3000);
+    }
+
+    function updateConnectionBadge(isConnected, labelText) {
+      const badge = document.getElementById("sync-status-badge");
+      const dot = document.getElementById("sync-status-dot");
+      const text = document.getElementById("sync-status-text");
+
+      if (isConnected) {
+        badge.className = "inline-flex items-center gap-1.5 ml-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shrink-0";
+        dot.className = "w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse";
+        text.textContent = labelText || "Live Sync";
+      } else {
+        badge.className = "inline-flex items-center gap-1.5 ml-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 shrink-0";
+        dot.className = "w-1.5 h-1.5 rounded-full bg-amber-500";
+        text.textContent = labelText || "Mode Lokal";
+      }
+    }
+
+    function estimateDataUrlBytes(dataUrl) {
+      const base64Index = dataUrl.indexOf("base64,");
+      if (base64Index === -1) return dataUrl.length;
+      const base64Str = dataUrl.slice(base64Index + 7);
+      return Math.ceil(base64Str.length * 0.75);
+    }
+
+    /**
+     * Compress image via HTML5 Canvas (max 800px, JPEG quality 0.72) and ensure < 120KB per image
+     */
+    function compressImageFile(file, maxDim = 800, quality = 0.72, maxBytes = 120 * 1024) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            let currentDim = maxDim;
+            let currentQuality = quality;
+            let resultUrl = "";
+
+            for (let attempt = 0; attempt < 5; attempt++) {
+              let width = img.width;
+              let height = img.height;
+              if (width > currentDim || height > currentDim) {
+                if (width > height) {
+                  height = Math.round((height * currentDim) / width);
+                  width = currentDim;
+                } else {
+                  width = Math.round((width * currentDim) / height);
+                  height = currentDim;
+                }
+              }
+
+              const canvas = document.createElement("canvas");
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext("2d");
+              ctx.fillStyle = "#09090b";
+              ctx.fillRect(0, 0, width, height);
+              ctx.drawImage(img, 0, 0, width, height);
+
+              resultUrl = canvas.toDataURL("image/jpeg", currentQuality);
+              if (estimateDataUrlBytes(resultUrl) <= maxBytes) {
+                break;
+              }
+              currentQuality = Math.max(0.38, currentQuality - 0.12);
+              currentDim = Math.round(currentDim * 0.85);
+            }
+
+            resolve(resultUrl);
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    /**
+     * Safely parses pasted Firebase config (either JSON or raw JS snippet from Firebase Console)
+     */
+    function parseFirebaseConfigInput(rawText) {
+      const text = String(rawText || "").trim();
+      if (!text) return null;
+
+      try {
+        const parsed = JSON.parse(text);
+        if (parsed && parsed.apiKey && parsed.projectId) return parsed;
+      } catch (_) {
+        // Fallback: extract key-value pairs from JS snippet
+      }
+
+      const keys = ["apiKey", "authDomain", "projectId", "storageBucket", "messagingSenderId", "appId"];
+      const extracted = {};
+      for (const k of keys) {
+        const regex = new RegExp(`["']?${k}["']?\\s*:\\s*["']([^"']+)["']`);
+        const match = text.match(regex);
+        if (match && match[1]) {
+          extracted[k] = match[1].trim();
+        }
+      }
+
+      if (extracted.apiKey && extracted.projectId) {
+        return extracted;
+      }
+      return null;
+    }
+
+    // =========================================================================
+    // 4. RENDERING FUNCTIONS
+    // =========================================================================
+    function renderProfileHeader() {
+      const { storeName, handle, whatsapp, bio, avatar } = state.settings;
+      const cleanHandle = handle.startsWith("@") ? handle : "@" + handle;
+
+      document.getElementById("nav-handle").textContent = cleanHandle;
+      document.getElementById("profile-handle").textContent = cleanHandle;
+      document.getElementById("detail-store-handle").textContent = cleanHandle;
+      document.getElementById("store-display-name").textContent = storeName || "OPBR Gam Store";
+      document.getElementById("store-bio").textContent = bio;
+
+      const avatarSrc = avatar || DEFAULT_AVATAR;
+      document.getElementById("store-avatar-img").src = avatarSrc;
+      document.getElementById("detail-avatar").src = avatarSrc;
+      document.getElementById("settings-avatar-preview").src = avatarSrc;
+
+      const total = state.accounts.length;
+      const ready = state.accounts.filter((a) => a.status === "ready").length;
+      const sold = state.accounts.filter((a) => a.status === "sold").length;
+
+      document.getElementById("stat-total").textContent = total;
+      document.getElementById("stat-ready").textContent = ready;
+      document.getElementById("stat-sold").textContent = sold;
+
+      const waNum = normalizeWhatsApp(whatsapp);
+      const waMsg = `Halo Admin ${cleanHandle}! Saya mau tanya stok akun OPBR yang tersedia.`;
+      document.getElementById("btn-header-wa").href = `https://wa.me/${waNum}?text=${encodeURIComponent(waMsg)}`;
+    }
+
+    function renderCatalogGrid() {
+      const loadingEl = document.getElementById("catalog-loading");
+      const gridEl = document.getElementById("catalog-grid");
+      const emptyEl = document.getElementById("catalog-empty");
+
+      loadingEl.classList.add("hidden");
+
+      const sorted = [...state.accounts].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+      const filtered = sorted.filter((acc) => {
+        if (state.filter === "ready") return acc.status === "ready";
+        if (state.filter === "sold") return acc.status === "sold";
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        gridEl.classList.add("hidden");
+        emptyEl.classList.remove("hidden");
+        return;
+      }
+
+      emptyEl.classList.add("hidden");
+      gridEl.classList.remove("hidden");
+      gridEl.innerHTML = "";
+
+      filtered.forEach((acc) => {
+        const isSold = acc.status === "sold";
+        const coverImg = (acc.images && acc.images.length > 0)
+          ? acc.images[0]
+          : generateSampleCardSVG("OPBR", acc.title, formatRupiah(acc.price), "#10b981", "#047857", isSold ? "SOLD" : "READY");
+        const hasMultiple = acc.images && acc.images.length > 1;
+
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = "group relative aspect-square w-full bg-zinc-900 overflow-hidden rounded-sm sm:rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500";
+        card.setAttribute("aria-label", `${acc.title} - ${formatRupiah(acc.price)}`);
+
+        card.innerHTML = `
+          <img src="${coverImg}" alt="${acc.title}" loading="lazy"
+            class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 ${isSold ? "opacity-55 grayscale-[35%]" : ""}" />
+
+          <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-black/30"></div>
+
+          <!-- Top-Left Status Pill -->
+          <div class="absolute top-1.5 left-1.5 sm:top-2.5 sm:left-2.5">
+            ${isSold
+              ? `<span class="inline-block px-1.5 py-0.5 sm:px-2 sm:py-0.5 rounded-md text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider bg-rose-950/90 text-rose-300 border border-rose-500/40 backdrop-blur-sm">SOLD</span>`
+              : `<span class="inline-block px-1.5 py-0.5 sm:px-2 sm:py-0.5 rounded-md text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider bg-emerald-500/95 text-white shadow-sm">READY</span>`
+            }
+          </div>
+
+          <!-- Top-Right Multi-Image Carousel Indicator -->
+          ${hasMultiple ? `
+            <div class="absolute top-1.5 right-1.5 sm:top-2.5 sm:right-2.5 text-white drop-shadow">
+              <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/>
+              </svg>
+            </div>
+          ` : ""}
+
+          <!-- Bottom Price & Short Title Badge -->
+          <div class="absolute bottom-1.5 left-1.5 right-1.5 sm:bottom-2.5 sm:left-2.5 sm:right-2.5 text-left">
+            <p class="text-[10px] sm:text-xs font-medium text-zinc-200 truncate leading-tight">${acc.title}</p>
+            <p class="text-xs sm:text-sm font-extrabold ${isSold ? "text-zinc-300 line-through" : "text-emerald-400"} leading-tight mt-0.5">
+              ${formatRupiah(acc.price)}
+            </p>
+          </div>
+        `;
+
+        card.addEventListener("click", () => openDetailModal(acc.id));
+        gridEl.appendChild(card);
+      });
+    }
+
+    function updateAdminUI() {
+      const toolbar = document.getElementById("admin-toolbar");
+      const statusPill = document.getElementById("admin-status-pill");
+      const lockClosed = document.getElementById("icon-lock-closed");
+      const lockOpen = document.getElementById("icon-lock-open");
+      const btnLabel = document.getElementById("admin-btn-label");
+      const detailAdminControls = document.getElementById("detail-admin-controls");
+
+      if (state.isAdmin) {
+        toolbar.classList.remove("hidden");
+        statusPill.classList.remove("hidden");
+        lockClosed.classList.add("hidden");
+        lockOpen.classList.remove("hidden");
+        btnLabel.textContent = "Admin Aktif";
+        detailAdminControls.classList.remove("hidden");
+      } else {
+        toolbar.classList.add("hidden");
+        statusPill.classList.add("hidden");
+        lockClosed.classList.remove("hidden");
+        lockOpen.classList.add("hidden");
+        btnLabel.textContent = "Admin";
+        detailAdminControls.classList.add("hidden");
+        document.getElementById("delete-confirm-box").classList.add("hidden");
+      }
+    }
+
+    // =========================================================================
+    // 5. ACCOUNT DETAIL MODAL & CAROUSEL LOGIC
+    // =========================================================================
+    function openDetailModal(accountId) {
+      const acc = state.accounts.find((a) => a.id === accountId);
+      if (!acc) return;
+
+      state.activeAccountId = accountId;
+      state.carouselIndex = 0;
+
+      const isSold = acc.status === "sold";
+      const badgeEl = document.getElementById("detail-status-badge");
+      if (isSold) {
+        badgeEl.textContent = "SOLD OUT";
+        badgeEl.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide bg-rose-500/15 text-rose-500 border border-rose-500/30";
+      } else {
+        badgeEl.textContent = "READY STOCK";
+        badgeEl.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide bg-emerald-500/15 text-emerald-500 border border-emerald-500/30";
+      }
+
+      document.getElementById("detail-title").textContent = acc.title;
+      document.getElementById("detail-price").textContent = formatRupiah(acc.price);
+      document.getElementById("detail-specs").textContent = acc.specs;
+
+      const waNum = normalizeWhatsApp(state.settings.whatsapp);
+      const handle = state.settings.handle.startsWith("@") ? state.settings.handle : "@" + state.settings.handle;
+      const message = isSold
+        ? `Halo Admin ${handle}! Saya lihat akun *${acc.title}* (${formatRupiah(acc.price)}) sudah SOLD. Apakah ada stok akun OPBR spek serupa yang masih ready?`
+        : `Halo Admin ${handle}! Saya tertarik mau beli akun OPBR ini:\n• Akun: *${acc.title}*\n• Harga: *${formatRupiah(acc.price)}*\nApakah akunnya masih ready?`;
+
+      const waBtn = document.getElementById("btn-detail-wa");
+      waBtn.href = `https://wa.me/${waNum}?text=${encodeURIComponent(message)}`;
+      document.getElementById("detail-wa-label").textContent = isSold
+        ? "Tanya Stok Serupa via WhatsApp"
+        : "Beli Akun Ini via WhatsApp";
+
+      document.getElementById("delete-confirm-box").classList.add("hidden");
+      document.getElementById("btn-toggle-status").textContent = isSold ? "Tandai Ready" : "Tandai Sold";
+
+      updateCarouselView();
+
+      const modal = document.getElementById("modal-detail");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function updateCarouselView() {
+      const acc = state.accounts.find((a) => a.id === state.activeAccountId);
+      if (!acc) return;
+
+      const images = (acc.images && acc.images.length > 0)
+        ? acc.images
+        : [generateSampleCardSVG("OPBR", acc.title, formatRupiah(acc.price), "#10b981", "#047857", "OPBR")];
+
+      if (state.carouselIndex >= images.length) state.carouselIndex = 0;
+      if (state.carouselIndex < 0) state.carouselIndex = images.length - 1;
+
+      document.getElementById("detail-main-img").src = images[state.carouselIndex];
+
+      const prevBtn = document.getElementById("carousel-prev");
+      const nextBtn = document.getElementById("carousel-next");
+      const counterEl = document.getElementById("carousel-counter");
+      const dotsEl = document.getElementById("carousel-dots");
+
+      if (images.length > 1) {
+        prevBtn.classList.remove("hidden");
+        nextBtn.classList.remove("hidden");
+        counterEl.classList.remove("hidden");
+        dotsEl.classList.remove("hidden");
+        counterEl.textContent = `${state.carouselIndex + 1} / ${images.length}`;
+
+        dotsEl.innerHTML = images.map((_, idx) => `
+          <span class="w-1.5 h-1.5 rounded-full transition-all ${idx === state.carouselIndex ? "bg-white w-3" : "bg-white/45"}"></span>
+        `).join("");
+      } else {
+        prevBtn.classList.add("hidden");
+        nextBtn.classList.add("hidden");
+        counterEl.classList.add("hidden");
+        dotsEl.classList.add("hidden");
+      }
+    }
+
+    function closeDetailModal() {
+      const modal = document.getElementById("modal-detail");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+      state.activeAccountId = null;
+    }
+
+    // =========================================================================
+    // 6. FIRESTORE & DATA PERSISTENCE OPERATIONS
+    // =========================================================================
+    async function saveAccountData(accountObj, editId = null) {
+      if (state.useFirestore && db && currentUser) {
+        const colRef = collection(db, "artifacts", appId, "public", "data", "opbr_accounts");
+        if (editId) {
+          const docRef = doc(db, "artifacts", appId, "public", "data", "opbr_accounts", editId);
+          await updateDoc(docRef, accountObj);
+        } else {
+          await addDoc(colRef, accountObj);
+        }
+      } else {
+        if (editId) {
+          const idx = state.accounts.findIndex((a) => a.id === editId);
+          if (idx !== -1) state.accounts[idx] = { ...state.accounts[idx], ...accountObj };
+        } else {
+          state.accounts.unshift({ id: "local_" + Date.now(), ...accountObj });
+        }
+        renderProfileHeader();
+        renderCatalogGrid();
+      }
+    }
+
+    async function toggleAccountStatus(accountId) {
+      const acc = state.accounts.find((a) => a.id === accountId);
+      if (!acc) return;
+      const nextStatus = acc.status === "ready" ? "sold" : "ready";
+
+      if (state.useFirestore && db && currentUser) {
+        const docRef = doc(db, "artifacts", appId, "public", "data", "opbr_accounts", accountId);
+        await updateDoc(docRef, { status: nextStatus });
+      } else {
+        acc.status = nextStatus;
+        renderProfileHeader();
+        renderCatalogGrid();
+      }
+      showToast(`Status diubah ke ${nextStatus.toUpperCase()}`);
+      openDetailModal(accountId);
+    }
+
+    async function deleteAccount(accountId) {
+      if (state.useFirestore && db && currentUser) {
+        const docRef = doc(db, "artifacts", appId, "public", "data", "opbr_accounts", accountId);
+        await deleteDoc(docRef);
+      } else {
+        state.accounts = state.accounts.filter((a) => a.id !== accountId);
+        renderProfileHeader();
+        renderCatalogGrid();
+      }
+      closeDetailModal();
+      showToast("Akun berhasil dihapus dari katalog");
+    }
+
+    async function saveStoreSettings(newSettings) {
+      if (state.useFirestore && db && currentUser) {
+        const docRef = doc(db, "artifacts", appId, "public", "data", "opbr_settings", "main");
+        await setDoc(docRef, newSettings, { merge: true });
+      } else {
+        state.settings = { ...state.settings, ...newSettings };
+        renderProfileHeader();
+      }
+      showToast("Pengaturan toko berhasil disimpan");
+    }
+
+    async function seedInitialSampleAccounts() {
+      if (state.useFirestore && db && currentUser) {
+        const colRef = collection(db, "artifacts", appId, "public", "data", "opbr_accounts");
+        for (const item of SAMPLE_ACCOUNTS) {
+          await addDoc(colRef, item);
+        }
+      } else {
+        state.accounts = SAMPLE_ACCOUNTS.map((item, idx) => ({
+          id: "sample_" + idx,
+          ...item
+        }));
+        renderProfileHeader();
+        renderCatalogGrid();
+      }
+    }
+
+    // =========================================================================
+    // 7. DUAL FIREBASE INITIALIZATION (CANVAS + SELF-HOSTING)
+    // =========================================================================
+    async function connectToFirebase(firebaseConfig) {
+      if (unsubSettings) { unsubSettings(); unsubSettings = null; }
+      if (unsubAccounts) { unsubAccounts(); unsubAccounts = null; }
+
+      const existingApps = getApps();
+      for (const existing of existingApps) {
+        await deleteApp(existing);
+      }
+
+      const app = initializeApp(firebaseConfig);
+      auth = getAuth(app);
+      db = getFirestore(app);
+
+      // RULE 3: Authenticate BEFORE running any Firestore queries
+      if (typeof __initial_auth_token !== "undefined" && __initial_auth_token) {
+        await signInWithCustomToken(auth, __initial_auth_token);
+      } else {
+        await signInAnonymously(auth);
+      }
+
+      currentUser = auth.currentUser;
+      if (!currentUser) throw new Error("Firebase anonymous user unavailable");
+
+      state.useFirestore = true;
+      state.activeFirebaseConfig = firebaseConfig;
+      updateConnectionBadge(true, "Live Sync");
+
+      // Listen to Store Settings at /artifacts/{appId}/public/data/opbr_settings/main
+      const configRef = doc(db, "artifacts", appId, "public", "data", "opbr_settings", "main");
+      unsubSettings = onSnapshot(
+        configRef,
+        (snap) => {
+          if (snap.exists()) {
+            state.settings = { ...DEFAULT_STORE_SETTINGS, ...snap.data() };
+          } else {
+            setDoc(configRef, DEFAULT_STORE_SETTINGS).catch(() => {});
+          }
+          renderProfileHeader();
+        },
+        (err) => {
+          console.error("Store settings listener error:", err);
+          renderProfileHeader();
+        }
+      );
+
+      // Listen to OPBR Accounts at /artifacts/{appId}/public/data/opbr_accounts
+      let seededCheckDone = false;
+      const accountsCol = collection(db, "artifacts", appId, "public", "data", "opbr_accounts");
+      unsubAccounts = onSnapshot(
+        accountsCol,
+        async (snapshot) => {
+          if (snapshot.empty && !seededCheckDone) {
+            seededCheckDone = true;
+            await seedInitialSampleAccounts();
+            return;
+          }
+          seededCheckDone = true;
+          state.accounts = snapshot.docs.map((d) => ({
+            id: d.id,
+            ...d.data()
+          }));
+          renderProfileHeader();
+          renderCatalogGrid();
+        },
+        (err) => {
+          console.error("Catalog listener error:", err);
+          state.useFirestore = false;
+          updateConnectionBadge(false, "Mode Lokal");
+          seedInitialSampleAccounts();
+        }
+      );
+    }
+
+    async function initApp() {
+      try {
+        const canvasConfig = typeof __firebase_config !== "undefined" ? JSON.parse(__firebase_config) : null;
+        const targetConfig = (canvasConfig && canvasConfig.apiKey) ? canvasConfig : EMBEDDED_FIREBASE_CONFIG;
+
+        if (targetConfig && targetConfig.apiKey) {
+          await connectToFirebase(targetConfig);
+        } else {
+          state.useFirestore = false;
+          updateConnectionBadge(false, "Mode Lokal");
+          renderProfileHeader();
+          await seedInitialSampleAccounts();
+        }
+      } catch (error) {
+        console.error("Init error:", error);
+        state.useFirestore = false;
+        updateConnectionBadge(false, "Mode Lokal");
+        renderProfileHeader();
+        await seedInitialSampleAccounts();
+      }
+    }
+
+    // =========================================================================
+    // 8. UI EVENT LISTENERS & INTERACTIONS
+    // =========================================================================
+    document.getElementById("btn-theme-toggle").addEventListener("click", () => {
+      document.documentElement.classList.toggle("dark");
+    });
+
+    document.querySelectorAll(".filter-tab").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        state.filter = btn.dataset.filter;
+        document.querySelectorAll(".filter-tab").forEach((t) => {
+          t.classList.remove("border-zinc-900", "dark:border-white", "text-zinc-900", "dark:text-white", "font-semibold");
+          t.classList.add("border-transparent", "text-zinc-500", "dark:text-zinc-400", "font-medium");
+        });
+        btn.classList.remove("border-transparent", "text-zinc-500", "dark:text-zinc-400", "font-medium");
+        btn.classList.add("border-zinc-900", "dark:border-white", "text-zinc-900", "dark:text-white", "font-semibold");
+        renderCatalogGrid();
+      });
+    });
+
+    // Admin Toggle & PIN Modal
+    const modalPin = document.getElementById("modal-pin");
+    const inputPin = document.getElementById("input-pin");
+    const pinError = document.getElementById("pin-error");
+
+    document.getElementById("btn-admin-toggle").addEventListener("click", () => {
+      if (state.isAdmin) {
+        showToast("Mode Admin sudah aktif");
+        return;
+      }
+      inputPin.value = "";
+      pinError.classList.add("hidden");
+      modalPin.classList.remove("hidden");
+      modalPin.classList.add("flex");
+      setTimeout(() => inputPin.focus(), 100);
+    });
+
+    document.getElementById("btn-close-pin").addEventListener("click", () => {
+      modalPin.classList.add("hidden");
+      modalPin.classList.remove("flex");
+    });
+
+    document.getElementById("form-pin").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const entered = inputPin.value.trim();
+      const currentPin = String(state.settings.pin || "1234");
+      if (entered === currentPin) {
+        state.isAdmin = true;
+        updateAdminUI();
+        modalPin.classList.add("hidden");
+        modalPin.classList.remove("flex");
+        showToast("Mode Admin terbuka!");
+      } else {
+        pinError.classList.remove("hidden");
+        inputPin.value = "";
+        inputPin.focus();
+      }
+    });
+
+    document.getElementById("btn-lock-admin").addEventListener("click", () => {
+      state.isAdmin = false;
+      updateAdminUI();
+      showToast("Keluar dari Mode Admin");
+    });
+
+    // Detail Modal Controls & Touch Swipe Carousel
+    document.getElementById("btn-close-detail").addEventListener("click", closeDetailModal);
+    document.getElementById("modal-detail").addEventListener("click", (e) => {
+      if (e.target.id === "modal-detail") closeDetailModal();
+    });
+
+    document.getElementById("carousel-prev").addEventListener("click", (e) => {
+      e.stopPropagation();
+      state.carouselIndex -= 1;
+      updateCarouselView();
+    });
+
+    document.getElementById("carousel-next").addEventListener("click", (e) => {
+      e.stopPropagation();
+      state.carouselIndex += 1;
+      updateCarouselView();
+    });
+
+    let touchStartX = 0;
+    const carouselEl = document.getElementById("detail-carousel");
+    carouselEl.addEventListener("touchstart", (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+    carouselEl.addEventListener("touchend", (e) => {
+      const diff = e.changedTouches[0].screenX - touchStartX;
+      if (Math.abs(diff) > 40) {
+        state.carouselIndex += diff < 0 ? 1 : -1;
+        updateCarouselView();
+      }
+    }, { passive: true });
+
+    document.getElementById("btn-toggle-status").addEventListener("click", () => {
+      if (state.activeAccountId) toggleAccountStatus(state.activeAccountId);
+    });
+
+    document.getElementById("btn-delete-account").addEventListener("click", () => {
+      document.getElementById("delete-confirm-box").classList.remove("hidden");
+    });
+
+    document.getElementById("btn-cancel-delete").addEventListener("click", () => {
+      document.getElementById("delete-confirm-box").classList.add("hidden");
+    });
+
+    document.getElementById("btn-confirm-delete").addEventListener("click", () => {
+      if (state.activeAccountId) deleteAccount(state.activeAccountId);
+    });
+
+    // =========================================================================
+    // 9. UPLOAD / EDIT ACCOUNT MODAL LOGIC (MAX 4 PHOTOS, REORDERABLE)
+    // =========================================================================
+    const modalUpload = document.getElementById("modal-upload");
+    const previewGrid = document.getElementById("upload-preview-grid");
+
+    function renderUploadPreviews() {
+      previewGrid.innerHTML = "";
+      document.getElementById("upload-photo-count").textContent = `${state.uploadImagesBuffer.length} / 4 foto`;
+
+      state.uploadImagesBuffer.forEach((src, index) => {
+        const wrapper = document.createElement("div");
+        wrapper.className = "relative aspect-square rounded-lg overflow-hidden border border-zinc-300 dark:border-zinc-700 bg-zinc-900 group";
+        wrapper.innerHTML = `
+          <img src="${src}" class="w-full h-full object-cover" alt="Preview ${index + 1}" />
+          ${index === 0 ? `<span class="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-emerald-600/90 text-[9px] font-bold text-white">Cover</span>` : ""}
+          <button type="button" data-idx="${index}" title="Hapus Foto"
+            class="btn-remove-preview absolute top-1 right-1 w-5 h-5 rounded-full bg-black/75 text-white text-xs flex items-center justify-center hover:bg-rose-600">
+            ×
+          </button>
+          <div class="absolute bottom-1 inset-x-1 flex items-center justify-between gap-1">
+            ${index > 0 ? `<button type="button" data-idx="${index}" data-dir="-1" title="Geser Kiri" class="btn-move-preview px-1.5 py-0.5 rounded bg-black/75 text-white text-[10px] hover:bg-zinc-700">&larr;</button>` : `<span></span>`}
+            ${index < state.uploadImagesBuffer.length - 1 ? `<button type="button" data-idx="${index}" data-dir="1" title="Geser Kanan" class="btn-move-preview px-1.5 py-0.5 rounded bg-black/75 text-white text-[10px] hover:bg-zinc-700">&rarr;</button>` : `<span></span>`}
+          </div>
+        `;
+        previewGrid.appendChild(wrapper);
+      });
+
+      previewGrid.querySelectorAll(".btn-remove-preview").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const idx = Number(btn.dataset.idx);
+          state.uploadImagesBuffer.splice(idx, 1);
+          renderUploadPreviews();
+        });
+      });
+
+      previewGrid.querySelectorAll(".btn-move-preview").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const idx = Number(btn.dataset.idx);
+          const dir = Number(btn.dataset.dir);
+          const targetIdx = idx + dir;
+          if (targetIdx < 0 || targetIdx >= state.uploadImagesBuffer.length) return;
+          const temp = state.uploadImagesBuffer[idx];
+          state.uploadImagesBuffer[idx] = state.uploadImagesBuffer[targetIdx];
+          state.uploadImagesBuffer[targetIdx] = temp;
+          renderUploadPreviews();
+        });
+      });
+    }
+
+    function openUploadModal(editAccount = null) {
+      state.uploadImagesBuffer = [];
+      document.getElementById("input-images").value = "";
+
+      if (editAccount) {
+        document.getElementById("upload-modal-title").textContent = "Edit Akun OPBR";
+        document.getElementById("btn-submit-upload").textContent = "Simpan Perubahan";
+        document.getElementById("edit-account-id").value = editAccount.id;
+        document.getElementById("input-title").value = editAccount.title;
+        document.getElementById("input-price").value = editAccount.price;
+        document.getElementById("input-status").value = editAccount.status;
+        document.getElementById("input-specs").value = editAccount.specs;
+        state.uploadImagesBuffer = [...(editAccount.images || [])].slice(0, 4);
+      } else {
+        document.getElementById("upload-modal-title").textContent = "Upload Akun OPBR Baru";
+        document.getElementById("btn-submit-upload").textContent = "Posting ke Katalog";
+        document.getElementById("edit-account-id").value = "";
+        document.getElementById("input-title").value = "";
+        document.getElementById("input-price").value = "";
+        document.getElementById("input-status").value = "ready";
+        document.getElementById("input-specs").value = "";
+      }
+
+      renderUploadPreviews();
+      modalUpload.classList.remove("hidden");
+      modalUpload.classList.add("flex");
+    }
+
+    function closeUploadModal() {
+      modalUpload.classList.add("hidden");
+      modalUpload.classList.remove("flex");
+    }
+
+    document.getElementById("btn-open-upload").addEventListener("click", () => openUploadModal(null));
+    document.getElementById("btn-edit-account").addEventListener("click", () => {
+      const acc = state.accounts.find((a) => a.id === state.activeAccountId);
+      if (acc) {
+        closeDetailModal();
+        openUploadModal(acc);
+      }
+    });
+    document.getElementById("btn-close-upload").addEventListener("click", closeUploadModal);
+    document.getElementById("btn-cancel-upload").addEventListener("click", closeUploadModal);
+
+    document.getElementById("input-images").addEventListener("change", async (e) => {
+      const files = Array.from(e.target.files || []);
+      if (files.length === 0) return;
+
+      const remainingSlots = 4 - state.uploadImagesBuffer.length;
+      if (remainingSlots <= 0) {
+        showToast("Maksimal 4 foto per akun");
+        return;
+      }
+
+      const submitBtn = document.getElementById("btn-submit-upload");
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Mengompresi foto...";
+
+      try {
+        const allowedFiles = files.slice(0, remainingSlots);
+        for (const file of allowedFiles) {
+          const compressed = await compressImageFile(file, 800, 0.72, 120 * 1024);
+          state.uploadImagesBuffer.push(compressed);
+        }
+        renderUploadPreviews();
+      } catch (err) {
+        console.error("Image compress error:", err);
+        showToast("Gagal memproses gambar");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = document.getElementById("edit-account-id").value ? "Simpan Perubahan" : "Posting ke Katalog";
+      }
+    });
+
+    document.getElementById("btn-insert-template").addEventListener("click", () => {
+      const specsInput = document.getElementById("input-specs");
+      specsInput.value = `• EX Units: \n• Bounty Fest (BF): \n• Rainbow Diamonds (RD): \n• Gold Fragments (GF): \n• Support Party: %\n• Login: Bandai ID (Aman 100%)`;
+      specsInput.focus();
+    });
+
+    document.getElementById("form-upload").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const editId = document.getElementById("edit-account-id").value.trim() || null;
+      const title = document.getElementById("input-title").value.trim();
+      const price = Number(document.getElementById("input-price").value) || 0;
+      const status = document.getElementById("input-status").value;
+      const specs = document.getElementById("input-specs").value.trim();
+
+      const images = state.uploadImagesBuffer.length > 0
+        ? state.uploadImagesBuffer.slice(0, 4)
+        : [generateSampleCardSVG("OPBR", title.slice(0, 20), formatRupiah(price), "#10b981", "#047857", status.toUpperCase())];
+
+      const submitBtn = document.getElementById("btn-submit-upload");
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Menyimpan...";
+
+      try {
+        const payload = {
+          title,
+          price,
+          status,
+          specs,
+          images
+        };
+        if (!editId) {
+          payload.createdAt = Date.now();
+        }
+        await saveAccountData(payload, editId);
+        closeUploadModal();
+        showToast(editId ? "Perubahan akun disimpan!" : "Akun berhasil diupload ke katalog!");
+      } catch (err) {
+        console.error("Save account error:", err);
+        showToast("Gagal menyimpan akun. Coba kurangi jumlah foto.");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = editId ? "Simpan Perubahan" : "Posting ke Katalog";
+      }
+    });
+
+    // =========================================================================
+    // 10. STORE SETTINGS & FIREBASE CONFIG MODAL LOGIC
+    // =========================================================================
+    const modalSettings = document.getElementById("modal-settings");
+    const modalFirebase = document.getElementById("modal-firebase");
+
+    document.getElementById("btn-open-settings").addEventListener("click", () => {
+      state.settingsAvatarBuffer = state.settings.avatar || DEFAULT_AVATAR;
+      document.getElementById("settings-avatar-preview").src = state.settingsAvatarBuffer;
+      document.getElementById("input-store-name").value = state.settings.storeName || "OPBR Gam Store";
+      document.getElementById("input-store-handle").value = state.settings.handle;
+      document.getElementById("input-store-wa").value = state.settings.whatsapp;
+      document.getElementById("input-store-bio").value = state.settings.bio;
+      document.getElementById("input-store-pin").value = state.settings.pin || "1234";
+
+      modalSettings.classList.remove("hidden");
+      modalSettings.classList.add("flex");
+    });
+
+    function closeSettingsModal() {
+      modalSettings.classList.add("hidden");
+      modalSettings.classList.remove("flex");
+    }
+
+    document.getElementById("btn-close-settings").addEventListener("click", closeSettingsModal);
+    document.getElementById("btn-cancel-settings").addEventListener("click", closeSettingsModal);
+
+    document.getElementById("input-store-avatar").addEventListener("change", async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      try {
+        const compressed = await compressImageFile(file, 320, 0.78, 80 * 1024);
+        state.settingsAvatarBuffer = compressed;
+        document.getElementById("settings-avatar-preview").src = compressed;
+      } catch (err) {
+        showToast("Gagal memuat foto profil");
+      }
+    });
+
+    document.getElementById("btn-reset-avatar").addEventListener("click", () => {
+      state.settingsAvatarBuffer = DEFAULT_AVATAR;
+      document.getElementById("settings-avatar-preview").src = DEFAULT_AVATAR;
+    });
+
+    document.getElementById("form-settings").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const storeName = document.getElementById("input-store-name").value.trim() || "OPBR Gam Store";
+      let handle = document.getElementById("input-store-handle").value.trim() || "@opbr.gam";
+      if (!handle.startsWith("@")) handle = "@" + handle;
+
+      const whatsapp = normalizeWhatsApp(document.getElementById("input-store-wa").value);
+      const bio = document.getElementById("input-store-bio").value.trim();
+      const pinRaw = document.getElementById("input-store-pin").value.replace(/\D/g, "");
+      const pin = pinRaw.length === 4 ? pinRaw : (state.settings.pin || "1234");
+
+      const saveBtn = document.getElementById("btn-save-settings");
+      saveBtn.disabled = true;
+      saveBtn.textContent = "Menyimpan...";
+
+      try {
+        await saveStoreSettings({
+          storeName,
+          handle,
+          whatsapp,
+          bio,
+          avatar: state.settingsAvatarBuffer || DEFAULT_AVATAR,
+          pin
+        });
+        closeSettingsModal();
+      } catch (err) {
+        console.error("Save settings error:", err);
+        showToast("Gagal menyimpan pengaturan");
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = "Simpan Pengaturan";
+      }
+    });
+
+    // Firebase Configuration Modal Handlers
+    document.getElementById("btn-open-firebase-modal").addEventListener("click", () => {
+      closeSettingsModal();
+      const errorEl = document.getElementById("firebase-config-error");
+      errorEl.classList.add("hidden");
+      if (state.activeFirebaseConfig) {
+        document.getElementById("input-firebase-config").value = JSON.stringify(state.activeFirebaseConfig, null, 2);
+      }
+      modalFirebase.classList.remove("hidden");
+      modalFirebase.classList.add("flex");
+    });
+
+    document.getElementById("btn-close-firebase").addEventListener("click", () => {
+      modalFirebase.classList.add("hidden");
+      modalFirebase.classList.remove("flex");
+    });
+
+    document.getElementById("btn-apply-firebase").addEventListener("click", async () => {
+      const raw = document.getElementById("input-firebase-config").value;
+      const errorEl = document.getElementById("firebase-config-error");
+      const parsed = parseFirebaseConfigInput(raw);
+
+      if (!parsed) {
+        errorEl.textContent = "Format firebaseConfig tidak valid. Pastikan mengandung apiKey dan projectId.";
+        errorEl.classList.remove("hidden");
+        return;
+      }
+
+      errorEl.classList.add("hidden");
+      const btn = document.getElementById("btn-apply-firebase");
+      btn.disabled = true;
+      btn.textContent = "Menghubungkan...";
+
+      try {
+        await connectToFirebase(parsed);
+        modalFirebase.classList.add("hidden");
+        modalFirebase.classList.remove("flex");
+        showToast("Berhasil terhubung ke Firebase Live Sync!");
+      } catch (err) {
+        console.error("Manual Firebase connect error:", err);
+        errorEl.textContent = "Gagal terhubung ke Firebase. Pastikan Anonymous Auth & Firestore sudah aktif.";
+        errorEl.classList.remove("hidden");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Hubungkan Sekarang";
+      }
+    });
+
+    // Generate & download standalone index.html with embedded firebaseConfig
+    document.getElementById("btn-download-selfhost").addEventListener("click", () => {
+      const raw = document.getElementById("input-firebase-config").value;
+      const errorEl = document.getElementById("firebase-config-error");
+      const parsed = parseFirebaseConfigInput(raw) || state.activeFirebaseConfig;
+
+      if (!parsed) {
+        errorEl.textContent = "Tempel dulu firebaseConfig di kotak atas sebelum mengunduh file siap hosting.";
+        errorEl.classList.remove("hidden");
+        return;
+      }
+
+      errorEl.classList.add("hidden");
+      const clonedHtml = document.documentElement.cloneNode(true);
+      clonedHtml.className = "dark";
+
+      // Reset transient UI state inside exported HTML
+      const hideIds = ["admin-toolbar", "admin-status-pill", "icon-lock-open", "modal-detail", "modal-pin", "modal-upload", "modal-settings", "modal-firebase", "toast-banner", "catalog-grid", "catalog-empty"];
+      hideIds.forEach((id) => {
+        const el = clonedHtml.querySelector("#" + id);
+        if (el) {
+          el.classList.add("hidden");
+          el.classList.remove("flex");
+        }
+      });
+
+      const loadingEl = clonedHtml.querySelector("#catalog-loading");
+      if (loadingEl) loadingEl.classList.remove("hidden");
+
+      const lockClosedEl = clonedHtml.querySelector("#icon-lock-closed");
+      if (lockClosedEl) lockClosedEl.classList.remove("hidden");
+
+      const adminBtnLabel = clonedHtml.querySelector("#admin-btn-label");
+      if (adminBtnLabel) adminBtnLabel.textContent = "Admin";
+
+      const gridEl = clonedHtml.querySelector("#catalog-grid");
+      if (gridEl) gridEl.innerHTML = "";
+
+      const previewEl = clonedHtml.querySelector("#upload-preview-grid");
+      if (previewEl) previewEl.innerHTML = "";
+
+      const scriptEl = clonedHtml.querySelector("script[type='module']");
+      if (scriptEl) {
+        scriptEl.textContent = scriptEl.textContent.replace(
+          /const EMBEDDED_FIREBASE_CONFIG = [\s\S]*?;/,
+          `const EMBEDDED_FIREBASE_CONFIG = ${JSON.stringify(parsed, null, 2)};`
+        );
+      }
+
+      const finalSource = "<!DOCTYPE html>\n" + clonedHtml.outerHTML;
+      const blob = new Blob([finalSource], { type: "text/html;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "index.html";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showToast("File index.html siap hosting berhasil diunduh!");
+    });
+
+    // Start Application
+    window.addEventListener("DOMContentLoaded", initApp);
+  </script>
+</body>
+</html>
