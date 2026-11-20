@@ -303,7 +303,7 @@
       <div id="detail-carousel" class="relative w-full aspect-square bg-zinc-950 select-none overflow-hidden group">
         <img id="detail-main-img" src="" alt="Screenshot Akun OPBR" class="w-full h-full object-contain bg-zinc-950 transition-opacity duration-200" />
 
-        <!-- Image Counter Pill (e.g. 1/3) -->
+        <!-- Image Counter Pill (e.g. 1/20) -->
         <div id="carousel-counter" class="hidden absolute top-3 right-3 px-2.5 py-1 rounded-full bg-black/70 text-white text-[11px] font-semibold backdrop-blur-sm">
           1 / 1
         </div>
@@ -325,7 +325,7 @@
         </button>
 
         <!-- Pagination Dots -->
-        <div id="carousel-dots" class="hidden absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/45 backdrop-blur-sm">
+        <div id="carousel-dots" class="hidden absolute bottom-3 left-1/2 -translate-x-1/2 flex flex-wrap justify-center items-center gap-1 max-w-[85%] px-2.5 py-1 rounded-full bg-black/45 backdrop-blur-sm">
         </div>
       </div>
 
@@ -409,7 +409,7 @@
       </div>
 
       <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-3">
-        Masukkan 4-digit PIN untuk upload akun & atur toko.
+        Masukkan 4-digit PIN untuk upload akun &amp; atur toko.
       </p>
 
       <form id="form-pin" class="space-y-3">
@@ -448,9 +448,9 @@
         <div>
           <div class="flex items-center justify-between mb-1.5">
             <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-              Screenshot Akun (Maks. 4 Foto)
+              Screenshot Akun (Maks. 20 Foto)
             </label>
-            <span id="upload-photo-count" class="text-[11px] font-semibold text-zinc-400">0 / 4 foto</span>
+            <span id="upload-photo-count" class="text-[11px] font-semibold text-zinc-400">0 / 20 foto</span>
           </div>
           <label for="input-images"
             class="flex flex-col items-center justify-center w-full py-5 px-4 border-2 border-dashed border-zinc-300 dark:border-zinc-700 hover:border-emerald-500 dark:hover:border-emerald-500 rounded-xl cursor-pointer bg-zinc-50 dark:bg-zinc-900/50 transition-colors">
@@ -458,12 +458,12 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
             </svg>
             <span class="text-xs sm:text-sm font-semibold text-zinc-700 dark:text-zinc-200">Klik untuk pilih screenshot dari galeri</span>
-            <span class="text-[11px] text-zinc-400 mt-0.5">Kompresi otomatis &lt;120KB/foto agar sinkron cepat</span>
+            <span class="text-[11px] text-zinc-400 mt-0.5">Kompresi otomatis adaptif (maks. 20 foto) agar sinkron cepat</span>
             <input id="input-images" type="file" accept="image/*" multiple class="hidden" />
           </label>
 
           <!-- Preview Thumbnails (Reorderable & Deletable) -->
-          <div id="upload-preview-grid" class="grid grid-cols-4 gap-2 mt-2.5 empty:hidden"></div>
+          <div id="upload-preview-grid" class="grid grid-cols-4 sm:grid-cols-5 gap-2 mt-2.5 max-h-60 overflow-y-auto pr-0.5 empty:hidden"></div>
         </div>
 
         <!-- Title / Account Code -->
@@ -500,7 +500,7 @@
         <div>
           <div class="flex items-center justify-between mb-1.5">
             <label for="input-specs" class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-              Spesifikasi & Detail Akun
+              Spesifikasi &amp; Detail Akun
             </label>
             <button id="btn-insert-template" type="button"
               class="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 hover:underline">
@@ -821,7 +821,7 @@
     let state = {
       accounts: [],
       settings: { ...DEFAULT_STORE_SETTINGS },
-      filter: "all", // 'all' | 'ready' | 'sold'
+      filter: "all",
       isAdmin: false,
       activeAccountId: null,
       carouselIndex: 0,
@@ -833,54 +833,63 @@
 
     let db = null;
     let auth = null;
-    let currentUser = null;
     let unsubSettings = null;
     let unsubAccounts = null;
     const appId = typeof __app_id !== "undefined" ? __app_id : "opbr-catalog-live";
 
     // =========================================================================
-    // 3. HELPER UTILITIES & ADAPTIVE JPEG COMPRESSION (<120KB)
+    // 3. HELPER UTILITIES & ADAPTIVE JPEG COMPRESSION (UP TO 20 PHOTOS)
     // =========================================================================
+    const MAX_PHOTOS_PER_ACCOUNT = 20;
+    const MAX_TOTAL_IMAGES_BYTES = 820 * 1024; // Menjaga total payload Firestore tetap aman di bawah 1MB
+
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
     function formatRupiah(num) {
       const n = Number(num) || 0;
       return "Rp " + n.toLocaleString("id-ID");
     }
 
-    function normalizeWhatsApp(raw) {
+    function sanitizeWhatsAppNumber(raw) {
       let digits = String(raw || "").replace(/\D/g, "");
       if (digits.startsWith("0")) {
         digits = "62" + digits.slice(1);
+      } else if (digits.startsWith("8")) {
+        digits = "62" + digits;
       }
       return digits || "6281234567890";
     }
 
-    function showToast(msg) {
-      const banner = document.getElementById("toast-banner");
-      const textEl = document.getElementById("toast-message");
-      textEl.textContent = msg;
-      banner.classList.remove("hidden");
-      banner.classList.add("flex");
-      clearTimeout(window._toastTimer);
-      window._toastTimer = setTimeout(() => {
-        banner.classList.add("hidden");
-        banner.classList.remove("flex");
-      }, 3000);
+    function buildWhatsAppUrl(account = null) {
+      const wa = sanitizeWhatsAppNumber(state.settings.whatsapp);
+      let text = "";
+      if (account) {
+        text = `Halo Admin ${state.settings.handle}, saya mau beli/tanya akun OPBR:\n• Akun: ${account.title}\n• Harga: ${formatRupiah(account.price)}\n• Status: ${account.status.toUpperCase()}\n\nApakah akun ini masih tersedia?`;
+      } else {
+        text = `Halo Admin ${state.settings.handle}, saya mau tanya stok akun OPBR di katalog web.`;
+      }
+      return `https://wa.me/${wa}?text=${encodeURIComponent(text)}`;
     }
 
-    function updateConnectionBadge(isConnected, labelText) {
-      const badge = document.getElementById("sync-status-badge");
-      const dot = document.getElementById("sync-status-dot");
-      const text = document.getElementById("sync-status-text");
-
-      if (isConnected) {
-        badge.className = "inline-flex items-center gap-1.5 ml-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shrink-0";
-        dot.className = "w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse";
-        text.textContent = labelText || "Live Sync";
-      } else {
-        badge.className = "inline-flex items-center gap-1.5 ml-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 shrink-0";
-        dot.className = "w-1.5 h-1.5 rounded-full bg-amber-500";
-        text.textContent = labelText || "Mode Lokal";
-      }
+    let toastTimer = null;
+    function showToast(message) {
+      const banner = document.getElementById("toast-banner");
+      const msgEl = document.getElementById("toast-message");
+      msgEl.textContent = message;
+      banner.classList.remove("hidden");
+      banner.classList.add("flex");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        banner.classList.add("hidden");
+        banner.classList.remove("flex");
+      }, 2800);
     }
 
     function estimateDataUrlBytes(dataUrl) {
@@ -890,106 +899,309 @@
       return Math.ceil(base64Str.length * 0.75);
     }
 
-    /**
-     * Compress image via HTML5 Canvas (max 800px, JPEG quality 0.72) and ensure < 120KB per image
-     */
+    function getTotalBufferBytes(images) {
+      return (images || []).reduce((sum, item) => sum + estimateDataUrlBytes(item), 0);
+    }
+
+    function compressImageSource(imgSrc, maxDim = 800, quality = 0.72, maxBytes = 120 * 1024) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          let currentDim = maxDim;
+          let currentQuality = quality;
+          let resultUrl = "";
+
+          for (let attempt = 0; attempt < 6; attempt++) {
+            let width = img.width;
+            let height = img.height;
+            if (width > currentDim || height > currentDim) {
+              if (width > height) {
+                height = Math.round((height * currentDim) / width);
+                width = currentDim;
+              } else {
+                width = Math.round((width * currentDim) / height);
+                height = currentDim;
+              }
+            }
+
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+            ctx.fillStyle = "#09090b";
+            ctx.fillRect(0, 0, width, height);
+            ctx.drawImage(img, 0, 0, width, height);
+
+            resultUrl = canvas.toDataURL("image/jpeg", currentQuality);
+            if (estimateDataUrlBytes(resultUrl) <= maxBytes) {
+              break;
+            }
+            currentQuality = Math.max(0.32, currentQuality - 0.1);
+            currentDim = Math.round(currentDim * 0.82);
+          }
+
+          resolve(resultUrl);
+        };
+        img.onerror = reject;
+        img.src = imgSrc;
+      });
+    }
+
     function compressImageFile(file, maxDim = 800, quality = 0.72, maxBytes = 120 * 1024) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = (e) => {
-          const img = new Image();
-          img.onload = () => {
-            let currentDim = maxDim;
-            let currentQuality = quality;
-            let resultUrl = "";
-
-            for (let attempt = 0; attempt < 5; attempt++) {
-              let width = img.width;
-              let height = img.height;
-              if (width > currentDim || height > currentDim) {
-                if (width > height) {
-                  height = Math.round((height * currentDim) / width);
-                  width = currentDim;
-                } else {
-                  width = Math.round((width * currentDim) / height);
-                  height = currentDim;
-                }
-              }
-
-              const canvas = document.createElement("canvas");
-              canvas.width = width;
-              canvas.height = height;
-              const ctx = canvas.getContext("2d");
-              ctx.fillStyle = "#09090b";
-              ctx.fillRect(0, 0, width, height);
-              ctx.drawImage(img, 0, 0, width, height);
-
-              resultUrl = canvas.toDataURL("image/jpeg", currentQuality);
-              if (estimateDataUrlBytes(resultUrl) <= maxBytes) {
-                break;
-              }
-              currentQuality = Math.max(0.38, currentQuality - 0.12);
-              currentDim = Math.round(currentDim * 0.85);
-            }
-
-            resolve(resultUrl);
-          };
-          img.onerror = reject;
-          img.src = e.target.result;
+        reader.onload = async (e) => {
+          try {
+            const compressed = await compressImageSource(e.target.result, maxDim, quality, maxBytes);
+            resolve(compressed);
+          } catch (err) {
+            reject(err);
+          }
         };
         reader.onerror = reject;
         reader.readAsDataURL(file);
       });
     }
 
+    async function rebalanceImageBuffer(images) {
+      if (getTotalBufferBytes(images) <= MAX_TOTAL_IMAGES_BYTES) return images;
+      const targetPerImage = Math.max(28 * 1024, Math.floor(MAX_TOTAL_IMAGES_BYTES / Math.max(1, images.length)));
+      const rebalanced = [];
+      for (const src of images) {
+        if (estimateDataUrlBytes(src) > targetPerImage) {
+          rebalanced.push(await compressImageSource(src, 580, 0.58, targetPerImage));
+        } else {
+          rebalanced.push(src);
+        }
+      }
+      return rebalanced;
+    }
+
     /**
      * Safely parses pasted Firebase config (either JSON or raw JS snippet from Firebase Console)
      */
-    function parseFirebaseConfigInput(rawText) {
-      const text = String(rawText || "").trim();
-      if (!text) return null;
+    function parseFirebaseConfig(rawText) {
+      if (!rawText || typeof rawText !== "string") {
+        throw new Error("Teks konfigurasi kosong.");
+      }
+      const start = rawText.indexOf("{");
+      const end = rawText.lastIndexOf("}");
+      if (start === -1 || end === -1 || end <= start) {
+        throw new Error("Format objek { ... } tidak ditemukan.");
+      }
+      let objText = rawText.slice(start, end + 1);
 
       try {
-        const parsed = JSON.parse(text);
-        if (parsed && parsed.apiKey && parsed.projectId) return parsed;
-      } catch (_) {
-        // Fallback: extract key-value pairs from JS snippet
-      }
-
-      const keys = ["apiKey", "authDomain", "projectId", "storageBucket", "messagingSenderId", "appId"];
-      const extracted = {};
-      for (const k of keys) {
-        const regex = new RegExp(`["']?${k}["']?\\s*:\\s*["']([^"']+)["']`);
-        const match = text.match(regex);
-        if (match && match[1]) {
-          extracted[k] = match[1].trim();
+        const parsed = JSON.parse(objText);
+        if (!parsed.apiKey || !parsed.projectId) {
+          throw new Error("apiKey dan projectId wajib ada di firebaseConfig.");
         }
+        return parsed;
+      } catch (_) {
+        // Normalize unquoted JS object keys and single-quoted string literals into valid JSON
+        let normalized = objText
+          .replace(/\/\/.*$/gm, "")
+          .replace(/\/\*[\s\S]*?\*\//g, "")
+          .replace(/([{,]\s*)([a-zA-Z0-9_$]+)\s*:/g, '$1"$2":')
+          .replace(/:\s*'([^']*)'/g, ': "$1"')
+          .replace(/,\s*([}\]])/g, "$1");
+
+        const parsed = JSON.parse(normalized);
+        if (!parsed.apiKey || !parsed.projectId) {
+          throw new Error("apiKey dan projectId wajib ada di firebaseConfig.");
+        }
+        return parsed;
+      }
+    }
+
+    // =========================================================================
+    // 4. STORAGE & REAL-TIME FIREBASE SYNC LAYER
+    // =========================================================================
+    const LOCAL_ACCOUNTS_KEY = "opbr_local_accounts_v2";
+    const LOCAL_SETTINGS_KEY = "opbr_local_settings_v2";
+    const LOCAL_FB_CONFIG_KEY = "opbr_custom_firebase_config";
+
+    function updateSyncBadge(mode, labelText) {
+      const dot = document.getElementById("sync-status-dot");
+      const text = document.getElementById("sync-status-text");
+      text.textContent = labelText;
+
+      if (mode === "live") {
+        dot.className = "w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse";
+      } else if (mode === "error") {
+        dot.className = "w-1.5 h-1.5 rounded-full bg-rose-500";
+      } else {
+        dot.className = "w-1.5 h-1.5 rounded-full bg-amber-400";
+      }
+    }
+
+    function loadLocalFallbackData() {
+      try {
+        const savedSettings = localStorage.getItem(LOCAL_SETTINGS_KEY);
+        if (savedSettings) {
+          state.settings = { ...DEFAULT_STORE_SETTINGS, ...JSON.parse(savedSettings) };
+        }
+      } catch (e) {
+        console.warn("Failed reading local settings:", e);
       }
 
-      if (extracted.apiKey && extracted.projectId) {
-        return extracted;
+      try {
+        const savedAccounts = localStorage.getItem(LOCAL_ACCOUNTS_KEY);
+        if (savedAccounts) {
+          state.accounts = JSON.parse(savedAccounts);
+        } else {
+          state.accounts = SAMPLE_ACCOUNTS.map((item, idx) => ({
+            ...item,
+            id: "sample-" + (idx + 1)
+          }));
+          localStorage.setItem(LOCAL_ACCOUNTS_KEY, JSON.stringify(state.accounts));
+        }
+      } catch (e) {
+        console.warn("Failed reading local accounts:", e);
+        state.accounts = SAMPLE_ACCOUNTS.map((item, idx) => ({
+          ...item,
+          id: "sample-" + (idx + 1)
+        }));
+      }
+
+      renderStoreProfile();
+      renderCatalog();
+    }
+
+    function persistLocalFallbackData() {
+      try {
+        localStorage.setItem(LOCAL_SETTINGS_KEY, JSON.stringify(state.settings));
+        localStorage.setItem(LOCAL_ACCOUNTS_KEY, JSON.stringify(state.accounts));
+      } catch (e) {
+        console.warn("Local storage quota notice:", e);
+      }
+    }
+
+    function getResolvedFirebaseConfig() {
+      if (EMBEDDED_FIREBASE_CONFIG && EMBEDDED_FIREBASE_CONFIG.apiKey) {
+        return EMBEDDED_FIREBASE_CONFIG;
+      }
+      try {
+        const storedCustom = localStorage.getItem(LOCAL_FB_CONFIG_KEY);
+        if (storedCustom) {
+          const parsed = JSON.parse(storedCustom);
+          if (parsed && parsed.apiKey && parsed.projectId) return parsed;
+        }
+      } catch (_) {}
+
+      if (typeof __firebase_config !== "undefined" && __firebase_config) {
+        try {
+          const envConfig = typeof __firebase_config === "string" ? JSON.parse(__firebase_config) : __firebase_config;
+          if (envConfig && envConfig.apiKey) return envConfig;
+        } catch (_) {}
       }
       return null;
     }
 
-    // =========================================================================
-    // 4. RENDERING FUNCTIONS
-    // =========================================================================
-    function renderProfileHeader() {
-      const { storeName, handle, whatsapp, bio, avatar } = state.settings;
-      const cleanHandle = handle.startsWith("@") ? handle : "@" + handle;
+    async function initFirebaseSync(configObj) {
+      if (unsubSettings) { unsubSettings(); unsubSettings = null; }
+      if (unsubAccounts) { unsubAccounts(); unsubAccounts = null; }
 
-      document.getElementById("nav-handle").textContent = cleanHandle;
-      document.getElementById("profile-handle").textContent = cleanHandle;
-      document.getElementById("detail-store-handle").textContent = cleanHandle;
-      document.getElementById("store-display-name").textContent = storeName || "OPBR Gam Store";
-      document.getElementById("store-bio").textContent = bio;
+      if (!configObj || !configObj.apiKey || !configObj.projectId) {
+        state.useFirestore = false;
+        updateSyncBadge("local", "Mode Lokal");
+        loadLocalFallbackData();
+        return false;
+      }
 
-      const avatarSrc = avatar || DEFAULT_AVATAR;
+      try {
+        updateSyncBadge("local", "Menghubungkan...");
+
+        const existingApps = getApps();
+        for (const appInstance of existingApps) {
+          await deleteApp(appInstance);
+        }
+
+        const app = initializeApp(configObj);
+        auth = getAuth(app);
+        db = getFirestore(app);
+
+        if (typeof __initial_auth_token !== "undefined" && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+
+        state.useFirestore = true;
+        state.activeFirebaseConfig = configObj;
+
+        const settingsDocRef = doc(db, "artifacts", appId, "public", "data", "store_settings", "main");
+        const accountsColRef = collection(db, "artifacts", appId, "public", "data", "accounts");
+        const seedFlagKey = `opbr_seeded_${configObj.projectId}`;
+
+        unsubSettings = onSnapshot(settingsDocRef, (snap) => {
+          if (snap.exists()) {
+            state.settings = { ...DEFAULT_STORE_SETTINGS, ...snap.data() };
+          } else {
+            setDoc(settingsDocRef, DEFAULT_STORE_SETTINGS).catch(() => {});
+          }
+          renderStoreProfile();
+        }, (err) => {
+          console.error("Settings sync error:", err);
+          updateSyncBadge("error", "Sync Terputus");
+        });
+
+        unsubAccounts = onSnapshot(accountsColRef, async (snapshot) => {
+          if (snapshot.empty && !localStorage.getItem(seedFlagKey)) {
+            localStorage.setItem(seedFlagKey, "1");
+            for (const sample of SAMPLE_ACCOUNTS) {
+              await addDoc(accountsColRef, sample).catch(() => {});
+            }
+            return;
+          }
+
+          const list = [];
+          snapshot.forEach((docSnap) => {
+            list.push({ id: docSnap.id, ...docSnap.data() });
+          });
+
+          list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+          state.accounts = list;
+          updateSyncBadge("live", "Live Sync");
+          renderStoreProfile();
+          renderCatalog();
+        }, (err) => {
+          console.error("Accounts sync error:", err);
+          updateSyncBadge("error", "Cek Rules DB");
+          showToast("Gagal sinkron Firestore. Pastikan Rules & Auth Anonymous aktif.");
+        });
+
+        return true;
+      } catch (err) {
+        console.error("Firebase init failed:", err);
+        state.useFirestore = false;
+        updateSyncBadge("error", "Gagal Konek");
+        loadLocalFallbackData();
+        return false;
+      }
+    }
+
+    // =========================================================================
+    // 5. RENDERING FUNCTIONS (PROFILE & INSTAGRAM GRID)
+    // =========================================================================
+    function renderStoreProfile() {
+      const s = state.settings;
+      const handleText = s.handle.startsWith("@") ? s.handle : "@" + s.handle;
+
+      document.title = `Katalog Akun OPBR • ${handleText}`;
+      document.getElementById("nav-handle").textContent = handleText;
+      document.getElementById("profile-handle").textContent = handleText;
+      document.getElementById("detail-store-handle").textContent = handleText;
+      document.getElementById("store-display-name").textContent = s.storeName || "OPBR Gam Store";
+      document.getElementById("store-bio").textContent = s.bio;
+
+      const avatarSrc = s.avatar || DEFAULT_AVATAR;
       document.getElementById("store-avatar-img").src = avatarSrc;
       document.getElementById("detail-avatar").src = avatarSrc;
-      document.getElementById("settings-avatar-preview").src = avatarSrc;
 
+      document.getElementById("btn-header-wa").href = buildWhatsAppUrl(null);
+
+      // Update Stats Counters
       const total = state.accounts.length;
       const ready = state.accounts.filter((a) => a.status === "ready").length;
       const sold = state.accounts.filter((a) => a.status === "sold").length;
@@ -997,22 +1209,16 @@
       document.getElementById("stat-total").textContent = total;
       document.getElementById("stat-ready").textContent = ready;
       document.getElementById("stat-sold").textContent = sold;
-
-      const waNum = normalizeWhatsApp(whatsapp);
-      const waMsg = `Halo Admin ${cleanHandle}! Saya mau tanya stok akun OPBR yang tersedia.`;
-      document.getElementById("btn-header-wa").href = `https://wa.me/${waNum}?text=${encodeURIComponent(waMsg)}`;
     }
 
-    function renderCatalogGrid() {
+    function renderCatalog() {
       const loadingEl = document.getElementById("catalog-loading");
       const gridEl = document.getElementById("catalog-grid");
       const emptyEl = document.getElementById("catalog-empty");
 
       loadingEl.classList.add("hidden");
 
-      const sorted = [...state.accounts].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-
-      const filtered = sorted.filter((acc) => {
+      const filtered = state.accounts.filter((acc) => {
         if (state.filter === "ready") return acc.status === "ready";
         if (state.filter === "sold") return acc.status === "sold";
         return true;
@@ -1028,135 +1234,116 @@
       gridEl.classList.remove("hidden");
       gridEl.innerHTML = "";
 
-      filtered.forEach((acc) => {
-        const isSold = acc.status === "sold";
-        const coverImg = (acc.images && acc.images.length > 0)
-          ? acc.images[0]
-          : generateSampleCardSVG("OPBR", acc.title, formatRupiah(acc.price), "#10b981", "#047857", isSold ? "SOLD" : "READY");
-        const hasMultiple = acc.images && acc.images.length > 1;
+      filtered.forEach((account) => {
+        const isSold = account.status === "sold";
+        const coverImg = (account.images && account.images[0]) || DEFAULT_AVATAR;
+        const photoCount = account.images ? account.images.length : 1;
 
         const card = document.createElement("button");
         card.type = "button";
-        card.className = "group relative aspect-square w-full bg-zinc-900 overflow-hidden rounded-sm sm:rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500";
-        card.setAttribute("aria-label", `${acc.title} - ${formatRupiah(acc.price)}`);
+        card.className = "group relative aspect-square w-full overflow-hidden bg-zinc-900 rounded-sm sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-left";
+        card.setAttribute("aria-label", account.title);
 
         card.innerHTML = `
-          <img src="${coverImg}" alt="${acc.title}" loading="lazy"
-            class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 ${isSold ? "opacity-55 grayscale-[35%]" : ""}" />
+          <img src="${coverImg}" alt="${escapeHtml(account.title)}" loading="lazy"
+            class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 ${isSold ? "opacity-45 grayscale" : ""}" />
 
-          <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-black/30"></div>
-
-          <!-- Top-Left Status Pill -->
-          <div class="absolute top-1.5 left-1.5 sm:top-2.5 sm:left-2.5">
-            ${isSold
-              ? `<span class="inline-block px-1.5 py-0.5 sm:px-2 sm:py-0.5 rounded-md text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider bg-rose-950/90 text-rose-300 border border-rose-500/40 backdrop-blur-sm">SOLD</span>`
-              : `<span class="inline-block px-1.5 py-0.5 sm:px-2 sm:py-0.5 rounded-md text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider bg-emerald-500/95 text-white shadow-sm">READY</span>`
-            }
+          <!-- Top-Left Status Badge -->
+          <div class="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 flex items-center gap-1">
+            <span class="px-1.5 sm:px-2 py-0.5 rounded-md text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider shadow-sm ${
+              isSold
+                ? "bg-rose-600/90 text-white"
+                : "bg-emerald-500/95 text-zinc-950"
+            }">
+              ${isSold ? "SOLD" : "READY"}
+            </span>
           </div>
 
           <!-- Top-Right Multi-Image Carousel Indicator -->
-          ${hasMultiple ? `
-            <div class="absolute top-1.5 right-1.5 sm:top-2.5 sm:right-2.5 text-white drop-shadow">
-              <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/>
-              </svg>
-            </div>
-          ` : ""}
+          ${
+            photoCount > 1
+              ? `<div class="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 px-1.5 py-0.5 rounded-md bg-black/65 text-white text-[9px] sm:text-[10px] font-bold flex items-center gap-1 backdrop-blur-xs">
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                    <rect x="7" y="7" width="13" height="13" rx="2"></rect>
+                    <path d="M4 15V6a2 2 0 0 1 2-2h9"></path>
+                  </svg>
+                  <span>${photoCount}</span>
+                </div>`
+              : ""
+          }
 
-          <!-- Bottom Price & Short Title Badge -->
-          <div class="absolute bottom-1.5 left-1.5 right-1.5 sm:bottom-2.5 sm:left-2.5 sm:right-2.5 text-left">
-            <p class="text-[10px] sm:text-xs font-medium text-zinc-200 truncate leading-tight">${acc.title}</p>
-            <p class="text-xs sm:text-sm font-extrabold ${isSold ? "text-zinc-300 line-through" : "text-emerald-400"} leading-tight mt-0.5">
-              ${formatRupiah(acc.price)}
+          <!-- Subtle Bottom Gradient Price & Title Overlay -->
+          <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/55 to-transparent p-2 sm:p-2.5 pt-7">
+            <p class="text-[10px] sm:text-xs font-semibold text-zinc-200 truncate">${escapeHtml(account.title)}</p>
+            <p class="text-[11px] sm:text-sm font-extrabold ${isSold ? "text-zinc-400 line-through" : "text-emerald-400"}">
+              ${formatRupiah(account.price)}
             </p>
           </div>
         `;
 
-        card.addEventListener("click", () => openDetailModal(acc.id));
+        card.addEventListener("click", () => openDetailModal(account.id));
         gridEl.appendChild(card);
       });
     }
 
-    function updateAdminUI() {
-      const toolbar = document.getElementById("admin-toolbar");
-      const statusPill = document.getElementById("admin-status-pill");
-      const lockClosed = document.getElementById("icon-lock-closed");
-      const lockOpen = document.getElementById("icon-lock-open");
-      const btnLabel = document.getElementById("admin-btn-label");
-      const detailAdminControls = document.getElementById("detail-admin-controls");
-
-      if (state.isAdmin) {
-        toolbar.classList.remove("hidden");
-        statusPill.classList.remove("hidden");
-        lockClosed.classList.add("hidden");
-        lockOpen.classList.remove("hidden");
-        btnLabel.textContent = "Admin Aktif";
-        detailAdminControls.classList.remove("hidden");
-      } else {
-        toolbar.classList.add("hidden");
-        statusPill.classList.add("hidden");
-        lockClosed.classList.remove("hidden");
-        lockOpen.classList.add("hidden");
-        btnLabel.textContent = "Admin";
-        detailAdminControls.classList.add("hidden");
-        document.getElementById("delete-confirm-box").classList.add("hidden");
-      }
-    }
-
     // =========================================================================
-    // 5. ACCOUNT DETAIL MODAL & CAROUSEL LOGIC
+    // 6. ACCOUNT DETAIL MODAL & CAROUSEL LOGIC
     // =========================================================================
+    const modalDetail = document.getElementById("modal-detail");
+
     function openDetailModal(accountId) {
-      const acc = state.accounts.find((a) => a.id === accountId);
-      if (!acc) return;
+      const account = state.accounts.find((a) => a.id === accountId);
+      if (!account) return;
 
       state.activeAccountId = accountId;
       state.carouselIndex = 0;
 
-      const isSold = acc.status === "sold";
-      const badgeEl = document.getElementById("detail-status-badge");
-      if (isSold) {
-        badgeEl.textContent = "SOLD OUT";
-        badgeEl.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide bg-rose-500/15 text-rose-500 border border-rose-500/30";
-      } else {
-        badgeEl.textContent = "READY STOCK";
-        badgeEl.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide bg-emerald-500/15 text-emerald-500 border border-emerald-500/30";
-      }
-
-      document.getElementById("detail-title").textContent = acc.title;
-      document.getElementById("detail-price").textContent = formatRupiah(acc.price);
-      document.getElementById("detail-specs").textContent = acc.specs;
-
-      const waNum = normalizeWhatsApp(state.settings.whatsapp);
-      const handle = state.settings.handle.startsWith("@") ? state.settings.handle : "@" + state.settings.handle;
-      const message = isSold
-        ? `Halo Admin ${handle}! Saya lihat akun *${acc.title}* (${formatRupiah(acc.price)}) sudah SOLD. Apakah ada stok akun OPBR spek serupa yang masih ready?`
-        : `Halo Admin ${handle}! Saya tertarik mau beli akun OPBR ini:\n• Akun: *${acc.title}*\n• Harga: *${formatRupiah(acc.price)}*\nApakah akunnya masih ready?`;
-
-      const waBtn = document.getElementById("btn-detail-wa");
-      waBtn.href = `https://wa.me/${waNum}?text=${encodeURIComponent(message)}`;
-      document.getElementById("detail-wa-label").textContent = isSold
-        ? "Tanya Stok Serupa via WhatsApp"
-        : "Beli Akun Ini via WhatsApp";
-
       document.getElementById("delete-confirm-box").classList.add("hidden");
-      document.getElementById("btn-toggle-status").textContent = isSold ? "Tandai Ready" : "Tandai Sold";
+      renderDetailModalContent(account);
 
-      updateCarouselView();
-
-      const modal = document.getElementById("modal-detail");
-      modal.classList.remove("hidden");
-      modal.classList.add("flex");
+      modalDetail.classList.remove("hidden");
+      modalDetail.classList.add("flex");
+      document.body.style.overflow = "hidden";
     }
 
-    function updateCarouselView() {
-      const acc = state.accounts.find((a) => a.id === state.activeAccountId);
-      if (!acc) return;
+    function renderDetailModalContent(account) {
+      const isSold = account.status === "sold";
+      const badgeEl = document.getElementById("detail-status-badge");
+      badgeEl.textContent = isSold ? "SOLD OUT" : "READY STOCK";
+      badgeEl.className = `px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide ${
+        isSold
+          ? "bg-rose-500/15 text-rose-500 border border-rose-500/30"
+          : "bg-emerald-500/15 text-emerald-500 border border-emerald-500/30"
+      }`;
 
-      const images = (acc.images && acc.images.length > 0)
-        ? acc.images
-        : [generateSampleCardSVG("OPBR", acc.title, formatRupiah(acc.price), "#10b981", "#047857", "OPBR")];
+      document.getElementById("detail-title").textContent = account.title;
+      document.getElementById("detail-price").textContent = formatRupiah(account.price);
+      document.getElementById("detail-specs").textContent = account.specs;
 
+      const waBtn = document.getElementById("btn-detail-wa");
+      const waLabel = document.getElementById("detail-wa-label");
+      waBtn.href = buildWhatsAppUrl(account);
+      if (isSold) {
+        waLabel.textContent = "Akun Terjual • Tanya Stok Serupa via WA";
+        waBtn.className = "w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-sm bg-zinc-700 hover:bg-zinc-600 text-white transition-all";
+      } else {
+        waLabel.textContent = "Beli Akun Ini via WhatsApp";
+        waBtn.className = "w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-sm bg-emerald-600 hover:bg-emerald-500 active:scale-[0.99] text-white shadow-md shadow-emerald-600/20 transition-all";
+      }
+
+      const adminControls = document.getElementById("detail-admin-controls");
+      if (state.isAdmin) {
+        adminControls.classList.remove("hidden");
+        document.getElementById("btn-toggle-status").textContent = isSold ? "Set Ready" : "Tandai Sold";
+      } else {
+        adminControls.classList.add("hidden");
+      }
+
+      updateCarouselSlide(account);
+    }
+
+    function updateCarouselSlide(account) {
+      const images = account.images && account.images.length > 0 ? account.images : [DEFAULT_AVATAR];
       if (state.carouselIndex >= images.length) state.carouselIndex = 0;
       if (state.carouselIndex < 0) state.carouselIndex = images.length - 1;
 
@@ -1174,8 +1361,9 @@
         dotsEl.classList.remove("hidden");
         counterEl.textContent = `${state.carouselIndex + 1} / ${images.length}`;
 
+        const compactDot = images.length > 8;
         dotsEl.innerHTML = images.map((_, idx) => `
-          <span class="w-1.5 h-1.5 rounded-full transition-all ${idx === state.carouselIndex ? "bg-white w-3" : "bg-white/45"}"></span>
+          <span class="${compactDot ? "h-1" : "h-1.5"} rounded-full transition-all ${idx === state.carouselIndex ? (compactDot ? "bg-white w-2.5" : "bg-white w-3") : (compactDot ? "bg-white/45 w-1" : "bg-white/45 w-1.5")}"></span>
         `).join("");
       } else {
         prevBtn.classList.add("hidden");
@@ -1186,274 +1374,32 @@
     }
 
     function closeDetailModal() {
-      const modal = document.getElementById("modal-detail");
-      modal.classList.add("hidden");
-      modal.classList.remove("flex");
+      modalDetail.classList.add("hidden");
+      modalDetail.classList.remove("flex");
       state.activeAccountId = null;
+      document.body.style.overflow = "";
     }
 
-    // =========================================================================
-    // 6. FIRESTORE & DATA PERSISTENCE OPERATIONS
-    // =========================================================================
-    async function saveAccountData(accountObj, editId = null) {
-      if (state.useFirestore && db && currentUser) {
-        const colRef = collection(db, "artifacts", appId, "public", "data", "opbr_accounts");
-        if (editId) {
-          const docRef = doc(db, "artifacts", appId, "public", "data", "opbr_accounts", editId);
-          await updateDoc(docRef, accountObj);
-        } else {
-          await addDoc(colRef, accountObj);
-        }
-      } else {
-        if (editId) {
-          const idx = state.accounts.findIndex((a) => a.id === editId);
-          if (idx !== -1) state.accounts[idx] = { ...state.accounts[idx], ...accountObj };
-        } else {
-          state.accounts.unshift({ id: "local_" + Date.now(), ...accountObj });
-        }
-        renderProfileHeader();
-        renderCatalogGrid();
-      }
-    }
-
-    async function toggleAccountStatus(accountId) {
-      const acc = state.accounts.find((a) => a.id === accountId);
-      if (!acc) return;
-      const nextStatus = acc.status === "ready" ? "sold" : "ready";
-
-      if (state.useFirestore && db && currentUser) {
-        const docRef = doc(db, "artifacts", appId, "public", "data", "opbr_accounts", accountId);
-        await updateDoc(docRef, { status: nextStatus });
-      } else {
-        acc.status = nextStatus;
-        renderProfileHeader();
-        renderCatalogGrid();
-      }
-      showToast(`Status diubah ke ${nextStatus.toUpperCase()}`);
-      openDetailModal(accountId);
-    }
-
-    async function deleteAccount(accountId) {
-      if (state.useFirestore && db && currentUser) {
-        const docRef = doc(db, "artifacts", appId, "public", "data", "opbr_accounts", accountId);
-        await deleteDoc(docRef);
-      } else {
-        state.accounts = state.accounts.filter((a) => a.id !== accountId);
-        renderProfileHeader();
-        renderCatalogGrid();
-      }
-      closeDetailModal();
-      showToast("Akun berhasil dihapus dari katalog");
-    }
-
-    async function saveStoreSettings(newSettings) {
-      if (state.useFirestore && db && currentUser) {
-        const docRef = doc(db, "artifacts", appId, "public", "data", "opbr_settings", "main");
-        await setDoc(docRef, newSettings, { merge: true });
-      } else {
-        state.settings = { ...state.settings, ...newSettings };
-        renderProfileHeader();
-      }
-      showToast("Pengaturan toko berhasil disimpan");
-    }
-
-    async function seedInitialSampleAccounts() {
-      if (state.useFirestore && db && currentUser) {
-        const colRef = collection(db, "artifacts", appId, "public", "data", "opbr_accounts");
-        for (const item of SAMPLE_ACCOUNTS) {
-          await addDoc(colRef, item);
-        }
-      } else {
-        state.accounts = SAMPLE_ACCOUNTS.map((item, idx) => ({
-          id: "sample_" + idx,
-          ...item
-        }));
-        renderProfileHeader();
-        renderCatalogGrid();
-      }
-    }
-
-    // =========================================================================
-    // 7. DUAL FIREBASE INITIALIZATION (CANVAS + SELF-HOSTING)
-    // =========================================================================
-    async function connectToFirebase(firebaseConfig) {
-      if (unsubSettings) { unsubSettings(); unsubSettings = null; }
-      if (unsubAccounts) { unsubAccounts(); unsubAccounts = null; }
-
-      const existingApps = getApps();
-      for (const existing of existingApps) {
-        await deleteApp(existing);
-      }
-
-      const app = initializeApp(firebaseConfig);
-      auth = getAuth(app);
-      db = getFirestore(app);
-
-      // RULE 3: Authenticate BEFORE running any Firestore queries
-      if (typeof __initial_auth_token !== "undefined" && __initial_auth_token) {
-        await signInWithCustomToken(auth, __initial_auth_token);
-      } else {
-        await signInAnonymously(auth);
-      }
-
-      currentUser = auth.currentUser;
-      if (!currentUser) throw new Error("Firebase anonymous user unavailable");
-
-      state.useFirestore = true;
-      state.activeFirebaseConfig = firebaseConfig;
-      updateConnectionBadge(true, "Live Sync");
-
-      // Listen to Store Settings at /artifacts/{appId}/public/data/opbr_settings/main
-      const configRef = doc(db, "artifacts", appId, "public", "data", "opbr_settings", "main");
-      unsubSettings = onSnapshot(
-        configRef,
-        (snap) => {
-          if (snap.exists()) {
-            state.settings = { ...DEFAULT_STORE_SETTINGS, ...snap.data() };
-          } else {
-            setDoc(configRef, DEFAULT_STORE_SETTINGS).catch(() => {});
-          }
-          renderProfileHeader();
-        },
-        (err) => {
-          console.error("Store settings listener error:", err);
-          renderProfileHeader();
-        }
-      );
-
-      // Listen to OPBR Accounts at /artifacts/{appId}/public/data/opbr_accounts
-      let seededCheckDone = false;
-      const accountsCol = collection(db, "artifacts", appId, "public", "data", "opbr_accounts");
-      unsubAccounts = onSnapshot(
-        accountsCol,
-        async (snapshot) => {
-          if (snapshot.empty && !seededCheckDone) {
-            seededCheckDone = true;
-            await seedInitialSampleAccounts();
-            return;
-          }
-          seededCheckDone = true;
-          state.accounts = snapshot.docs.map((d) => ({
-            id: d.id,
-            ...d.data()
-          }));
-          renderProfileHeader();
-          renderCatalogGrid();
-        },
-        (err) => {
-          console.error("Catalog listener error:", err);
-          state.useFirestore = false;
-          updateConnectionBadge(false, "Mode Lokal");
-          seedInitialSampleAccounts();
-        }
-      );
-    }
-
-    async function initApp() {
-      try {
-        const canvasConfig = typeof __firebase_config !== "undefined" ? JSON.parse(__firebase_config) : null;
-        const targetConfig = (canvasConfig && canvasConfig.apiKey) ? canvasConfig : EMBEDDED_FIREBASE_CONFIG;
-
-        if (targetConfig && targetConfig.apiKey) {
-          await connectToFirebase(targetConfig);
-        } else {
-          state.useFirestore = false;
-          updateConnectionBadge(false, "Mode Lokal");
-          renderProfileHeader();
-          await seedInitialSampleAccounts();
-        }
-      } catch (error) {
-        console.error("Init error:", error);
-        state.useFirestore = false;
-        updateConnectionBadge(false, "Mode Lokal");
-        renderProfileHeader();
-        await seedInitialSampleAccounts();
-      }
-    }
-
-    // =========================================================================
-    // 8. UI EVENT LISTENERS & INTERACTIONS
-    // =========================================================================
-    document.getElementById("btn-theme-toggle").addEventListener("click", () => {
-      document.documentElement.classList.toggle("dark");
-    });
-
-    document.querySelectorAll(".filter-tab").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        state.filter = btn.dataset.filter;
-        document.querySelectorAll(".filter-tab").forEach((t) => {
-          t.classList.remove("border-zinc-900", "dark:border-white", "text-zinc-900", "dark:text-white", "font-semibold");
-          t.classList.add("border-transparent", "text-zinc-500", "dark:text-zinc-400", "font-medium");
-        });
-        btn.classList.remove("border-transparent", "text-zinc-500", "dark:text-zinc-400", "font-medium");
-        btn.classList.add("border-zinc-900", "dark:border-white", "text-zinc-900", "dark:text-white", "font-semibold");
-        renderCatalogGrid();
-      });
-    });
-
-    // Admin Toggle & PIN Modal
-    const modalPin = document.getElementById("modal-pin");
-    const inputPin = document.getElementById("input-pin");
-    const pinError = document.getElementById("pin-error");
-
-    document.getElementById("btn-admin-toggle").addEventListener("click", () => {
-      if (state.isAdmin) {
-        showToast("Mode Admin sudah aktif");
-        return;
-      }
-      inputPin.value = "";
-      pinError.classList.add("hidden");
-      modalPin.classList.remove("hidden");
-      modalPin.classList.add("flex");
-      setTimeout(() => inputPin.focus(), 100);
-    });
-
-    document.getElementById("btn-close-pin").addEventListener("click", () => {
-      modalPin.classList.add("hidden");
-      modalPin.classList.remove("flex");
-    });
-
-    document.getElementById("form-pin").addEventListener("submit", (e) => {
-      e.preventDefault();
-      const entered = inputPin.value.trim();
-      const currentPin = String(state.settings.pin || "1234");
-      if (entered === currentPin) {
-        state.isAdmin = true;
-        updateAdminUI();
-        modalPin.classList.add("hidden");
-        modalPin.classList.remove("flex");
-        showToast("Mode Admin terbuka!");
-      } else {
-        pinError.classList.remove("hidden");
-        inputPin.value = "";
-        inputPin.focus();
-      }
-    });
-
-    document.getElementById("btn-lock-admin").addEventListener("click", () => {
-      state.isAdmin = false;
-      updateAdminUI();
-      showToast("Keluar dari Mode Admin");
-    });
-
-    // Detail Modal Controls & Touch Swipe Carousel
     document.getElementById("btn-close-detail").addEventListener("click", closeDetailModal);
-    document.getElementById("modal-detail").addEventListener("click", (e) => {
-      if (e.target.id === "modal-detail") closeDetailModal();
+    modalDetail.addEventListener("click", (e) => {
+      if (e.target === modalDetail) closeDetailModal();
     });
 
-    document.getElementById("carousel-prev").addEventListener("click", (e) => {
-      e.stopPropagation();
+    document.getElementById("carousel-prev").addEventListener("click", () => {
+      const acc = state.accounts.find((a) => a.id === state.activeAccountId);
+      if (!acc) return;
       state.carouselIndex -= 1;
-      updateCarouselView();
+      updateCarouselSlide(acc);
     });
 
-    document.getElementById("carousel-next").addEventListener("click", (e) => {
-      e.stopPropagation();
+    document.getElementById("carousel-next").addEventListener("click", () => {
+      const acc = state.accounts.find((a) => a.id === state.activeAccountId);
+      if (!acc) return;
       state.carouselIndex += 1;
-      updateCarouselView();
+      updateCarouselSlide(acc);
     });
 
+    // Touch swipe support for carousel on mobile
     let touchStartX = 0;
     const carouselEl = document.getElementById("detail-carousel");
     carouselEl.addEventListener("touchstart", (e) => {
@@ -1461,14 +1407,48 @@
     }, { passive: true });
     carouselEl.addEventListener("touchend", (e) => {
       const diff = e.changedTouches[0].screenX - touchStartX;
-      if (Math.abs(diff) > 40) {
-        state.carouselIndex += diff < 0 ? 1 : -1;
-        updateCarouselView();
-      }
+      if (Math.abs(diff) < 40) return;
+      const acc = state.accounts.find((a) => a.id === state.activeAccountId);
+      if (!acc || !acc.images || acc.images.length <= 1) return;
+      state.carouselIndex += diff < 0 ? 1 : -1;
+      updateCarouselSlide(acc);
     }, { passive: true });
 
-    document.getElementById("btn-toggle-status").addEventListener("click", () => {
-      if (state.activeAccountId) toggleAccountStatus(state.activeAccountId);
+    // =========================================================================
+    // 7. ADMIN ACTIONS ON ACTIVE ACCOUNT (TOGGLE STATUS / EDIT / DELETE)
+    // =========================================================================
+    document.getElementById("btn-toggle-status").addEventListener("click", async () => {
+      const acc = state.accounts.find((a) => a.id === state.activeAccountId);
+      if (!acc) return;
+      const nextStatus = acc.status === "sold" ? "ready" : "sold";
+
+      if (state.useFirestore && db) {
+        try {
+          await updateDoc(doc(db, "artifacts", appId, "public", "data", "accounts", acc.id), {
+            status: nextStatus
+          });
+          showToast(`Status diubah ke ${nextStatus.toUpperCase()}`);
+          acc.status = nextStatus;
+          renderDetailModalContent(acc);
+        } catch (err) {
+          console.error(err);
+          showToast("Gagal mengubah status di database");
+        }
+      } else {
+        acc.status = nextStatus;
+        persistLocalFallbackData();
+        renderStoreProfile();
+        renderCatalog();
+        renderDetailModalContent(acc);
+        showToast(`Status diubah ke ${nextStatus.toUpperCase()}`);
+      }
+    });
+
+    document.getElementById("btn-edit-account").addEventListener("click", () => {
+      const acc = state.accounts.find((a) => a.id === state.activeAccountId);
+      if (!acc) return;
+      closeDetailModal();
+      openUploadModal(acc);
     });
 
     document.getElementById("btn-delete-account").addEventListener("click", () => {
@@ -1479,64 +1459,162 @@
       document.getElementById("delete-confirm-box").classList.add("hidden");
     });
 
-    document.getElementById("btn-confirm-delete").addEventListener("click", () => {
-      if (state.activeAccountId) deleteAccount(state.activeAccountId);
+    document.getElementById("btn-confirm-delete").addEventListener("click", async () => {
+      const accId = state.activeAccountId;
+      if (!accId) return;
+
+      if (state.useFirestore && db) {
+        try {
+          await deleteDoc(doc(db, "artifacts", appId, "public", "data", "accounts", accId));
+          closeDetailModal();
+          showToast("Akun berhasil dihapus");
+        } catch (err) {
+          console.error(err);
+          showToast("Gagal menghapus akun");
+        }
+      } else {
+        state.accounts = state.accounts.filter((a) => a.id !== accId);
+        persistLocalFallbackData();
+        renderStoreProfile();
+        renderCatalog();
+        closeDetailModal();
+        showToast("Akun berhasil dihapus");
+      }
     });
 
     // =========================================================================
-    // 9. UPLOAD / EDIT ACCOUNT MODAL LOGIC (MAX 4 PHOTOS, REORDERABLE)
+    // 8. ADMIN MODE UNLOCK / LOCK & PIN MODAL
+    // =========================================================================
+    const modalPin = document.getElementById("modal-pin");
+
+    function setAdminMode(unlocked) {
+      state.isAdmin = unlocked;
+      const toolbar = document.getElementById("admin-toolbar");
+      const statusPill = document.getElementById("admin-status-pill");
+      const lockClosed = document.getElementById("icon-lock-closed");
+      const lockOpen = document.getElementById("icon-lock-open");
+      const btnLabel = document.getElementById("admin-btn-label");
+
+      if (unlocked) {
+        toolbar.classList.remove("hidden");
+        statusPill.classList.remove("hidden");
+        lockClosed.classList.add("hidden");
+        lockOpen.classList.remove("hidden");
+        btnLabel.textContent = "Admin Aktif";
+      } else {
+        toolbar.classList.add("hidden");
+        statusPill.classList.add("hidden");
+        lockClosed.classList.remove("hidden");
+        lockOpen.classList.add("hidden");
+        btnLabel.textContent = "Admin";
+      }
+    }
+
+    document.getElementById("btn-admin-toggle").addEventListener("click", () => {
+      if (state.isAdmin) {
+        const toolbar = document.getElementById("admin-toolbar");
+        toolbar.classList.toggle("hidden");
+        return;
+      }
+      document.getElementById("input-pin").value = "";
+      document.getElementById("pin-error").classList.add("hidden");
+      modalPin.classList.remove("hidden");
+      modalPin.classList.add("flex");
+      setTimeout(() => document.getElementById("input-pin").focus(), 60);
+    });
+
+    document.getElementById("btn-close-pin").addEventListener("click", () => {
+      modalPin.classList.add("hidden");
+      modalPin.classList.remove("flex");
+    });
+
+    document.getElementById("form-pin").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const entered = document.getElementById("input-pin").value.trim();
+      const validPin = String(state.settings.pin || "1234");
+      if (entered === validPin) {
+        modalPin.classList.add("hidden");
+        modalPin.classList.remove("flex");
+        setAdminMode(true);
+        showToast("Mode Admin aktif!");
+      } else {
+        document.getElementById("pin-error").classList.remove("hidden");
+      }
+    });
+
+    document.getElementById("btn-lock-admin").addEventListener("click", () => {
+      setAdminMode(false);
+      showToast("Keluar dari Mode Admin");
+    });
+
+    // =========================================================================
+    // 9. UPLOAD / EDIT ACCOUNT MODAL LOGIC (MAX 20 PHOTOS, REORDERABLE)
     // =========================================================================
     const modalUpload = document.getElementById("modal-upload");
     const previewGrid = document.getElementById("upload-preview-grid");
 
     function renderUploadPreviews() {
       previewGrid.innerHTML = "";
-      document.getElementById("upload-photo-count").textContent = `${state.uploadImagesBuffer.length} / 4 foto`;
+      const totalKB = Math.round(getTotalBufferBytes(state.uploadImagesBuffer) / 1024);
+      document.getElementById("upload-photo-count").textContent = state.uploadImagesBuffer.length > 0
+        ? `${state.uploadImagesBuffer.length} / ${MAX_PHOTOS_PER_ACCOUNT} foto (${totalKB} KB)`
+        : `0 / ${MAX_PHOTOS_PER_ACCOUNT} foto`;
 
       state.uploadImagesBuffer.forEach((src, index) => {
         const wrapper = document.createElement("div");
-        wrapper.className = "relative aspect-square rounded-lg overflow-hidden border border-zinc-300 dark:border-zinc-700 bg-zinc-900 group";
+        wrapper.className = "relative aspect-square rounded-xl overflow-hidden border border-zinc-300 dark:border-zinc-700 bg-zinc-900 group";
         wrapper.innerHTML = `
-          <img src="${src}" class="w-full h-full object-cover" alt="Preview ${index + 1}" />
-          ${index === 0 ? `<span class="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-emerald-600/90 text-[9px] font-bold text-white">Cover</span>` : ""}
-          <button type="button" data-idx="${index}" title="Hapus Foto"
-            class="btn-remove-preview absolute top-1 right-1 w-5 h-5 rounded-full bg-black/75 text-white text-xs flex items-center justify-center hover:bg-rose-600">
-            ×
+          <img src="${src}" alt="Preview ${index + 1}" class="w-full h-full object-cover" />
+          <span class="absolute top-1 left-1 px-1.5 py-0.2 rounded bg-black/70 text-white text-[10px] font-bold">${index + 1}</span>
+          <button type="button" data-remove-idx="${index}" title="Hapus foto"
+            class="absolute top-1 right-1 w-5 h-5 rounded-full bg-rose-600 text-white flex items-center justify-center text-xs font-bold shadow">
+            &times;
           </button>
-          <div class="absolute bottom-1 inset-x-1 flex items-center justify-between gap-1">
-            ${index > 0 ? `<button type="button" data-idx="${index}" data-dir="-1" title="Geser Kiri" class="btn-move-preview px-1.5 py-0.5 rounded bg-black/75 text-white text-[10px] hover:bg-zinc-700">&larr;</button>` : `<span></span>`}
-            ${index < state.uploadImagesBuffer.length - 1 ? `<button type="button" data-idx="${index}" data-dir="1" title="Geser Kanan" class="btn-move-preview px-1.5 py-0.5 rounded bg-black/75 text-white text-[10px] hover:bg-zinc-700">&rarr;</button>` : `<span></span>`}
+          <div class="absolute inset-x-0 bottom-0 flex justify-between bg-black/65 px-1 py-0.5">
+            <button type="button" data-move-left="${index}" ${index === 0 ? "disabled" : ""}
+              class="text-[10px] text-white font-bold px-1 disabled:opacity-30">&larr;</button>
+            <button type="button" data-move-right="${index}" ${index === state.uploadImagesBuffer.length - 1 ? "disabled" : ""}
+              class="text-[10px] text-white font-bold px-1 disabled:opacity-30">&rarr;</button>
           </div>
         `;
         previewGrid.appendChild(wrapper);
       });
 
-      previewGrid.querySelectorAll(".btn-remove-preview").forEach((btn) => {
+      previewGrid.querySelectorAll("[data-remove-idx]").forEach((btn) => {
         btn.addEventListener("click", () => {
-          const idx = Number(btn.dataset.idx);
+          const idx = Number(btn.getAttribute("data-remove-idx"));
           state.uploadImagesBuffer.splice(idx, 1);
           renderUploadPreviews();
         });
       });
 
-      previewGrid.querySelectorAll(".btn-move-preview").forEach((btn) => {
+      previewGrid.querySelectorAll("[data-move-left]").forEach((btn) => {
         btn.addEventListener("click", () => {
-          const idx = Number(btn.dataset.idx);
-          const dir = Number(btn.dataset.dir);
-          const targetIdx = idx + dir;
-          if (targetIdx < 0 || targetIdx >= state.uploadImagesBuffer.length) return;
-          const temp = state.uploadImagesBuffer[idx];
-          state.uploadImagesBuffer[idx] = state.uploadImagesBuffer[targetIdx];
-          state.uploadImagesBuffer[targetIdx] = temp;
-          renderUploadPreviews();
+          const idx = Number(btn.getAttribute("data-move-left"));
+          if (idx > 0) {
+            const temp = state.uploadImagesBuffer[idx - 1];
+            state.uploadImagesBuffer[idx - 1] = state.uploadImagesBuffer[idx];
+            state.uploadImagesBuffer[idx] = temp;
+            renderUploadPreviews();
+          }
+        });
+      });
+
+      previewGrid.querySelectorAll("[data-move-right]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const idx = Number(btn.getAttribute("data-move-right"));
+          if (idx < state.uploadImagesBuffer.length - 1) {
+            const temp = state.uploadImagesBuffer[idx + 1];
+            state.uploadImagesBuffer[idx + 1] = state.uploadImagesBuffer[idx];
+            state.uploadImagesBuffer[idx] = temp;
+            renderUploadPreviews();
+          }
         });
       });
     }
 
     function openUploadModal(editAccount = null) {
-      state.uploadImagesBuffer = [];
       document.getElementById("input-images").value = "";
-
       if (editAccount) {
         document.getElementById("upload-modal-title").textContent = "Edit Akun OPBR";
         document.getElementById("btn-submit-upload").textContent = "Simpan Perubahan";
@@ -1545,7 +1623,7 @@
         document.getElementById("input-price").value = editAccount.price;
         document.getElementById("input-status").value = editAccount.status;
         document.getElementById("input-specs").value = editAccount.specs;
-        state.uploadImagesBuffer = [...(editAccount.images || [])].slice(0, 4);
+        state.uploadImagesBuffer = [...(editAccount.images || [])].slice(0, MAX_PHOTOS_PER_ACCOUNT);
       } else {
         document.getElementById("upload-modal-title").textContent = "Upload Akun OPBR Baru";
         document.getElementById("btn-submit-upload").textContent = "Posting ke Katalog";
@@ -1554,26 +1632,22 @@
         document.getElementById("input-price").value = "";
         document.getElementById("input-status").value = "ready";
         document.getElementById("input-specs").value = "";
+        state.uploadImagesBuffer = [];
       }
 
       renderUploadPreviews();
       modalUpload.classList.remove("hidden");
       modalUpload.classList.add("flex");
+      document.body.style.overflow = "hidden";
     }
 
     function closeUploadModal() {
       modalUpload.classList.add("hidden");
       modalUpload.classList.remove("flex");
+      document.body.style.overflow = "";
     }
 
     document.getElementById("btn-open-upload").addEventListener("click", () => openUploadModal(null));
-    document.getElementById("btn-edit-account").addEventListener("click", () => {
-      const acc = state.accounts.find((a) => a.id === state.activeAccountId);
-      if (acc) {
-        closeDetailModal();
-        openUploadModal(acc);
-      }
-    });
     document.getElementById("btn-close-upload").addEventListener("click", closeUploadModal);
     document.getElementById("btn-cancel-upload").addEventListener("click", closeUploadModal);
 
@@ -1581,9 +1655,9 @@
       const files = Array.from(e.target.files || []);
       if (files.length === 0) return;
 
-      const remainingSlots = 4 - state.uploadImagesBuffer.length;
+      const remainingSlots = MAX_PHOTOS_PER_ACCOUNT - state.uploadImagesBuffer.length;
       if (remainingSlots <= 0) {
-        showToast("Maksimal 4 foto per akun");
+        showToast(`Maksimal ${MAX_PHOTOS_PER_ACCOUNT} foto per akun`);
         return;
       }
 
@@ -1593,10 +1667,24 @@
 
       try {
         const allowedFiles = files.slice(0, remainingSlots);
+        if (files.length > remainingSlots) {
+          showToast(`Hanya ${remainingSlots} foto pertama yang ditambahkan (maks. ${MAX_PHOTOS_PER_ACCOUNT})`);
+        }
+
+        const plannedCount = state.uploadImagesBuffer.length + allowedFiles.length;
+        const perImageTargetBytes = Math.min(
+          120 * 1024,
+          Math.floor(MAX_TOTAL_IMAGES_BYTES / Math.max(1, plannedCount))
+        );
+        const targetDim = plannedCount > 10 ? 600 : (plannedCount > 5 ? 700 : 800);
+        const targetQuality = plannedCount > 10 ? 0.62 : 0.72;
+
         for (const file of allowedFiles) {
-          const compressed = await compressImageFile(file, 800, 0.72, 120 * 1024);
+          const compressed = await compressImageFile(file, targetDim, targetQuality, perImageTargetBytes);
           state.uploadImagesBuffer.push(compressed);
         }
+
+        state.uploadImagesBuffer = await rebalanceImageBuffer(state.uploadImagesBuffer);
         renderUploadPreviews();
       } catch (err) {
         console.error("Image compress error:", err);
@@ -1608,241 +1696,332 @@
     });
 
     document.getElementById("btn-insert-template").addEventListener("click", () => {
-      const specsInput = document.getElementById("input-specs");
-      specsInput.value = `• EX Units: \n• Bounty Fest (BF): \n• Rainbow Diamonds (RD): \n• Gold Fragments (GF): \n• Support Party: %\n• Login: Bandai ID (Aman 100%)`;
-      specsInput.focus();
+      const specsBox = document.getElementById("input-specs");
+      specsBox.value = "• EX Units: \n• Rainbow Diamonds (RD): \n• Gold Fragments (GF): \n• Support Party: %\n• Medal Set: \n• Login: Bandai ID (Aman 100%)";
+      specsBox.focus();
     });
 
     document.getElementById("form-upload").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const editId = document.getElementById("edit-account-id").value.trim() || null;
+      const editId = document.getElementById("edit-account-id").value;
       const title = document.getElementById("input-title").value.trim();
       const price = Number(document.getElementById("input-price").value) || 0;
       const status = document.getElementById("input-status").value;
       const specs = document.getElementById("input-specs").value.trim();
 
       const images = state.uploadImagesBuffer.length > 0
-        ? state.uploadImagesBuffer.slice(0, 4)
+        ? state.uploadImagesBuffer.slice(0, MAX_PHOTOS_PER_ACCOUNT)
         : [generateSampleCardSVG("OPBR", title.slice(0, 20), formatRupiah(price), "#10b981", "#047857", status.toUpperCase())];
 
       const submitBtn = document.getElementById("btn-submit-upload");
       submitBtn.disabled = true;
-      submitBtn.textContent = "Menyimpan...";
 
       try {
-        const payload = {
-          title,
-          price,
-          status,
-          specs,
-          images
-        };
-        if (!editId) {
-          payload.createdAt = Date.now();
+        if (state.useFirestore && db) {
+          if (editId) {
+            await updateDoc(doc(db, "artifacts", appId, "public", "data", "accounts", editId), {
+              title,
+              price,
+              status,
+              specs,
+              images
+            });
+            showToast("Perubahan akun tersimpan & Live!");
+          } else {
+            await addDoc(collection(db, "artifacts", appId, "public", "data", "accounts"), {
+              title,
+              price,
+              status,
+              specs,
+              images,
+              createdAt: Date.now()
+            });
+            showToast("Akun baru berhasil diposting!");
+          }
+        } else {
+          if (editId) {
+            const target = state.accounts.find((a) => a.id === editId);
+            if (target) {
+              Object.assign(target, { title, price, status, specs, images });
+            }
+            showToast("Perubahan akun disimpan (Lokal)");
+          } else {
+            state.accounts.unshift({
+              id: "acc-" + Date.now(),
+              title,
+              price,
+              status,
+              specs,
+              images,
+              createdAt: Date.now()
+            });
+            showToast("Akun baru ditambahkan (Lokal)");
+          }
+          persistLocalFallbackData();
+          renderStoreProfile();
+          renderCatalog();
         }
-        await saveAccountData(payload, editId);
         closeUploadModal();
-        showToast(editId ? "Perubahan akun disimpan!" : "Akun berhasil diupload ke katalog!");
       } catch (err) {
         console.error("Save account error:", err);
-        showToast("Gagal menyimpan akun. Coba kurangi jumlah foto.");
+        showToast("Gagal menyimpan akun ke database");
       } finally {
         submitBtn.disabled = false;
-        submitBtn.textContent = editId ? "Simpan Perubahan" : "Posting ke Katalog";
       }
     });
 
     // =========================================================================
-    // 10. STORE SETTINGS & FIREBASE CONFIG MODAL LOGIC
+    // 10. STORE SETTINGS & FIREBASE SELF-HOSTING MODAL LOGIC
     // =========================================================================
     const modalSettings = document.getElementById("modal-settings");
     const modalFirebase = document.getElementById("modal-firebase");
 
-    document.getElementById("btn-open-settings").addEventListener("click", () => {
-      state.settingsAvatarBuffer = state.settings.avatar || DEFAULT_AVATAR;
+    function openSettingsModal() {
+      const s = state.settings;
+      state.settingsAvatarBuffer = s.avatar || DEFAULT_AVATAR;
       document.getElementById("settings-avatar-preview").src = state.settingsAvatarBuffer;
-      document.getElementById("input-store-name").value = state.settings.storeName || "OPBR Gam Store";
-      document.getElementById("input-store-handle").value = state.settings.handle;
-      document.getElementById("input-store-wa").value = state.settings.whatsapp;
-      document.getElementById("input-store-bio").value = state.settings.bio;
-      document.getElementById("input-store-pin").value = state.settings.pin || "1234";
+      document.getElementById("input-store-name").value = s.storeName || "";
+      document.getElementById("input-store-handle").value = s.handle || "@opbr.gam";
+      document.getElementById("input-store-wa").value = s.whatsapp || "";
+      document.getElementById("input-store-bio").value = s.bio || "";
+      document.getElementById("input-store-pin").value = s.pin || "1234";
+      document.getElementById("input-store-avatar").value = "";
 
       modalSettings.classList.remove("hidden");
       modalSettings.classList.add("flex");
-    });
+      document.body.style.overflow = "hidden";
+    }
 
     function closeSettingsModal() {
       modalSettings.classList.add("hidden");
       modalSettings.classList.remove("flex");
+      document.body.style.overflow = "";
     }
 
+    document.getElementById("btn-open-settings").addEventListener("click", openSettingsModal);
     document.getElementById("btn-close-settings").addEventListener("click", closeSettingsModal);
     document.getElementById("btn-cancel-settings").addEventListener("click", closeSettingsModal);
 
     document.getElementById("input-store-avatar").addEventListener("change", async (e) => {
-      const file = e.target.files?.[0];
+      const file = e.target.files && e.target.files[0];
       if (!file) return;
       try {
-        const compressed = await compressImageFile(file, 320, 0.78, 80 * 1024);
-        state.settingsAvatarBuffer = compressed;
-        document.getElementById("settings-avatar-preview").src = compressed;
+        const compressedAvatar = await compressImageFile(file, 320, 0.8, 80 * 1024);
+        state.settingsAvatarBuffer = compressedAvatar;
+        document.getElementById("settings-avatar-preview").src = compressedAvatar;
       } catch (err) {
-        showToast("Gagal memuat foto profil");
+        console.error(err);
+        showToast("Gagal memproses foto profil");
       }
     });
 
     document.getElementById("btn-reset-avatar").addEventListener("click", () => {
       state.settingsAvatarBuffer = DEFAULT_AVATAR;
       document.getElementById("settings-avatar-preview").src = DEFAULT_AVATAR;
+      showToast("Foto profil direset ke default");
     });
 
     document.getElementById("form-settings").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const storeName = document.getElementById("input-store-name").value.trim() || "OPBR Gam Store";
-      let handle = document.getElementById("input-store-handle").value.trim() || "@opbr.gam";
-      if (!handle.startsWith("@")) handle = "@" + handle;
-
-      const whatsapp = normalizeWhatsApp(document.getElementById("input-store-wa").value);
-      const bio = document.getElementById("input-store-bio").value.trim();
-      const pinRaw = document.getElementById("input-store-pin").value.replace(/\D/g, "");
-      const pin = pinRaw.length === 4 ? pinRaw : (state.settings.pin || "1234");
-
-      const saveBtn = document.getElementById("btn-save-settings");
-      saveBtn.disabled = true;
-      saveBtn.textContent = "Menyimpan...";
+      const rawHandle = document.getElementById("input-store-handle").value.trim() || "@opbr.gam";
+      const updatedSettings = {
+        storeName: document.getElementById("input-store-name").value.trim() || "OPBR Gam Store",
+        handle: rawHandle.startsWith("@") ? rawHandle : "@" + rawHandle,
+        whatsapp: sanitizeWhatsAppNumber(document.getElementById("input-store-wa").value),
+        bio: document.getElementById("input-store-bio").value.trim(),
+        pin: (document.getElementById("input-store-pin").value.trim().replace(/\D/g, "") || "1234").slice(0, 4),
+        avatar: state.settingsAvatarBuffer || DEFAULT_AVATAR
+      };
 
       try {
-        await saveStoreSettings({
-          storeName,
-          handle,
-          whatsapp,
-          bio,
-          avatar: state.settingsAvatarBuffer || DEFAULT_AVATAR,
-          pin
-        });
+        if (state.useFirestore && db) {
+          await setDoc(doc(db, "artifacts", appId, "public", "data", "store_settings", "main"), updatedSettings);
+          showToast("Pengaturan toko diperbarui secara real-time!");
+        } else {
+          state.settings = updatedSettings;
+          persistLocalFallbackData();
+          renderStoreProfile();
+          showToast("Pengaturan toko disimpan (Lokal)");
+        }
         closeSettingsModal();
       } catch (err) {
-        console.error("Save settings error:", err);
-        showToast("Gagal menyimpan pengaturan");
-      } finally {
-        saveBtn.disabled = false;
-        saveBtn.textContent = "Simpan Pengaturan";
+        console.error(err);
+        showToast("Gagal menyimpan pengaturan toko");
       }
     });
 
-    // Firebase Configuration Modal Handlers
+    // Firebase Config Modal Handlers
     document.getElementById("btn-open-firebase-modal").addEventListener("click", () => {
       closeSettingsModal();
-      const errorEl = document.getElementById("firebase-config-error");
-      errorEl.classList.add("hidden");
+      document.getElementById("firebase-config-error").classList.add("hidden");
       if (state.activeFirebaseConfig) {
         document.getElementById("input-firebase-config").value = JSON.stringify(state.activeFirebaseConfig, null, 2);
       }
       modalFirebase.classList.remove("hidden");
       modalFirebase.classList.add("flex");
+      document.body.style.overflow = "hidden";
     });
 
     document.getElementById("btn-close-firebase").addEventListener("click", () => {
       modalFirebase.classList.add("hidden");
       modalFirebase.classList.remove("flex");
+      document.body.style.overflow = "";
     });
 
     document.getElementById("btn-apply-firebase").addEventListener("click", async () => {
-      const raw = document.getElementById("input-firebase-config").value;
-      const errorEl = document.getElementById("firebase-config-error");
-      const parsed = parseFirebaseConfigInput(raw);
-
-      if (!parsed) {
-        errorEl.textContent = "Format firebaseConfig tidak valid. Pastikan mengandung apiKey dan projectId.";
-        errorEl.classList.remove("hidden");
-        return;
-      }
-
-      errorEl.classList.add("hidden");
-      const btn = document.getElementById("btn-apply-firebase");
-      btn.disabled = true;
-      btn.textContent = "Menghubungkan...";
-
+      const errEl = document.getElementById("firebase-config-error");
+      errEl.classList.add("hidden");
       try {
-        await connectToFirebase(parsed);
-        modalFirebase.classList.add("hidden");
-        modalFirebase.classList.remove("flex");
-        showToast("Berhasil terhubung ke Firebase Live Sync!");
-      } catch (err) {
-        console.error("Manual Firebase connect error:", err);
-        errorEl.textContent = "Gagal terhubung ke Firebase. Pastikan Anonymous Auth & Firestore sudah aktif.";
-        errorEl.classList.remove("hidden");
-      } finally {
-        btn.disabled = false;
-        btn.textContent = "Hubungkan Sekarang";
-      }
-    });
-
-    // Generate & download standalone index.html with embedded firebaseConfig
-    document.getElementById("btn-download-selfhost").addEventListener("click", () => {
-      const raw = document.getElementById("input-firebase-config").value;
-      const errorEl = document.getElementById("firebase-config-error");
-      const parsed = parseFirebaseConfigInput(raw) || state.activeFirebaseConfig;
-
-      if (!parsed) {
-        errorEl.textContent = "Tempel dulu firebaseConfig di kotak atas sebelum mengunduh file siap hosting.";
-        errorEl.classList.remove("hidden");
-        return;
-      }
-
-      errorEl.classList.add("hidden");
-      const clonedHtml = document.documentElement.cloneNode(true);
-      clonedHtml.className = "dark";
-
-      // Reset transient UI state inside exported HTML
-      const hideIds = ["admin-toolbar", "admin-status-pill", "icon-lock-open", "modal-detail", "modal-pin", "modal-upload", "modal-settings", "modal-firebase", "toast-banner", "catalog-grid", "catalog-empty"];
-      hideIds.forEach((id) => {
-        const el = clonedHtml.querySelector("#" + id);
-        if (el) {
-          el.classList.add("hidden");
-          el.classList.remove("flex");
+        const parsed = parseFirebaseConfig(document.getElementById("input-firebase-config").value);
+        localStorage.setItem(LOCAL_FB_CONFIG_KEY, JSON.stringify(parsed));
+        const ok = await initFirebaseSync(parsed);
+        if (ok) {
+          modalFirebase.classList.add("hidden");
+          modalFirebase.classList.remove("flex");
+          document.body.style.overflow = "";
+          showToast("Firebase terhubung! Sinkronisasi Live aktif.");
+        } else {
+          errEl.textContent = "Gagal menghubungkan ke Firebase. Periksa kembali apiKey dan projectId.";
+          errEl.classList.remove("hidden");
         }
-      });
-
-      const loadingEl = clonedHtml.querySelector("#catalog-loading");
-      if (loadingEl) loadingEl.classList.remove("hidden");
-
-      const lockClosedEl = clonedHtml.querySelector("#icon-lock-closed");
-      if (lockClosedEl) lockClosedEl.classList.remove("hidden");
-
-      const adminBtnLabel = clonedHtml.querySelector("#admin-btn-label");
-      if (adminBtnLabel) adminBtnLabel.textContent = "Admin";
-
-      const gridEl = clonedHtml.querySelector("#catalog-grid");
-      if (gridEl) gridEl.innerHTML = "";
-
-      const previewEl = clonedHtml.querySelector("#upload-preview-grid");
-      if (previewEl) previewEl.innerHTML = "";
-
-      const scriptEl = clonedHtml.querySelector("script[type='module']");
-      if (scriptEl) {
-        scriptEl.textContent = scriptEl.textContent.replace(
-          /const EMBEDDED_FIREBASE_CONFIG = [\s\S]*?;/,
-          `const EMBEDDED_FIREBASE_CONFIG = ${JSON.stringify(parsed, null, 2)};`
-        );
+      } catch (err) {
+        errEl.textContent = err.message || "Format firebaseConfig tidak valid.";
+        errEl.classList.remove("hidden");
       }
-
-      const finalSource = "<!DOCTYPE html>\n" + clonedHtml.outerHTML;
-      const blob = new Blob([finalSource], { type: "text/html;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "index.html";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-
-      showToast("File index.html siap hosting berhasil diunduh!");
     });
 
-    // Start Application
-    window.addEventListener("DOMContentLoaded", initApp);
+    document.getElementById("btn-download-selfhost").addEventListener("click", () => {
+      const errEl = document.getElementById("firebase-config-error");
+      errEl.classList.add("hidden");
+      try {
+        const rawInput = document.getElementById("input-firebase-config").value.trim();
+        const configToEmbed = rawInput ? parseFirebaseConfig(rawInput) : state.activeFirebaseConfig;
+        if (!configToEmbed) {
+          throw new Error("Tempel kode firebaseConfig terlebih dahulu sebelum download.");
+        }
+
+        // Clone DOM and reset transient UI so exported HTML starts clean
+        const clonedDoc = document.documentElement.cloneNode(true);
+        const clonedGrid = clonedDoc.querySelector("#catalog-grid");
+        const clonedLoading = clonedDoc.querySelector("#catalog-loading");
+        const clonedPreview = clonedDoc.querySelector("#upload-preview-grid");
+        if (clonedGrid) {
+          clonedGrid.innerHTML = "";
+          clonedGrid.classList.add("hidden");
+        }
+        if (clonedLoading) {
+          clonedLoading.classList.remove("hidden");
+        }
+        if (clonedPreview) {
+          clonedPreview.innerHTML = "";
+        }
+
+        // Hide all modals & admin toolbar in exported snapshot
+        ["#modal-detail", "#modal-pin", "#modal-upload", "#modal-settings", "#modal-firebase", "#toast-banner"].forEach((sel) => {
+          const el = clonedDoc.querySelector(sel);
+          if (el) {
+            el.classList.add("hidden");
+            el.classList.remove("flex");
+          }
+        });
+        const clonedToolbar = clonedDoc.querySelector("#admin-toolbar");
+        if (clonedToolbar) clonedToolbar.classList.add("hidden");
+
+        let fullHtml = "<!DOCTYPE html>\n" + clonedDoc.outerHTML;
+        fullHtml = fullHtml.replace(
+          /const EMBEDDED_FIREBASE_CONFIG\s*=\s*[\s\S]*?;/,
+          `const EMBEDDED_FIREBASE_CONFIG = ${JSON.stringify(configToEmbed, null, 2)};`
+        );
+
+        const blob = new Blob([fullHtml], { type: "text/html;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "index.html";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        showToast("index.html siap hosting berhasil didownload!");
+      } catch (err) {
+        errEl.textContent = err.message || "Gagal membuat file index.html.";
+        errEl.classList.remove("hidden");
+      }
+    });
+
+    // =========================================================================
+    // 11. FILTER TABS, THEME TOGGLE & KEYBOARD SHORTCUTS
+    // =========================================================================
+    document.querySelectorAll(".filter-tab").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        const filterVal = tab.getAttribute("data-filter");
+        state.filter = filterVal;
+
+        document.querySelectorAll(".filter-tab").forEach((t) => {
+          const isSelected = t.getAttribute("data-filter") === filterVal;
+          t.className = isSelected
+            ? "filter-tab active-tab flex items-center justify-center gap-1.5 py-3 text-xs sm:text-sm font-semibold border-t-2 border-zinc-900 dark:border-white text-zinc-900 dark:text-white transition-colors"
+            : "filter-tab flex items-center justify-center gap-1.5 py-3 text-xs sm:text-sm font-medium border-t-2 border-transparent text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors";
+        });
+
+        renderCatalog();
+      });
+    });
+
+    // Light / Dark Mode Toggle
+    const THEME_STORAGE_KEY = "opbr_theme_mode";
+    function applySavedTheme() {
+      const saved = localStorage.getItem(THEME_STORAGE_KEY);
+      if (saved === "light") {
+        document.documentElement.classList.remove("dark");
+      } else {
+        document.documentElement.classList.add("dark");
+      }
+    }
+    applySavedTheme();
+
+    document.getElementById("btn-theme-toggle").addEventListener("click", () => {
+      const isDark = document.documentElement.classList.toggle("dark");
+      localStorage.setItem(THEME_STORAGE_KEY, isDark ? "dark" : "light");
+    });
+
+    // Keyboard navigation for carousel and closing modals
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        if (!modalDetail.classList.contains("hidden")) closeDetailModal();
+        if (!modalUpload.classList.contains("hidden")) closeUploadModal();
+        if (!modalSettings.classList.contains("hidden")) closeSettingsModal();
+        if (!modalFirebase.classList.contains("hidden")) {
+          modalFirebase.classList.add("hidden");
+          modalFirebase.classList.remove("flex");
+          document.body.style.overflow = "";
+        }
+        if (!modalPin.classList.contains("hidden")) {
+          modalPin.classList.add("hidden");
+          modalPin.classList.remove("flex");
+        }
+      } else if (!modalDetail.classList.contains("hidden")) {
+        const acc = state.accounts.find((a) => a.id === state.activeAccountId);
+        if (!acc || !acc.images || acc.images.length <= 1) return;
+        if (e.key === "ArrowLeft") {
+          state.carouselIndex -= 1;
+          updateCarouselSlide(acc);
+        } else if (e.key === "ArrowRight") {
+          state.carouselIndex += 1;
+          updateCarouselSlide(acc);
+        }
+      }
+    });
+
+    // =========================================================================
+    // 12. INITIAL BOOTSTRAP
+    // =========================================================================
+    window.addEventListener("DOMContentLoaded", () => {
+      renderStoreProfile();
+      const resolvedConfig = getResolvedFirebaseConfig();
+      initFirebaseSync(resolvedConfig);
+    });
   </script>
 </body>
 </html>
